@@ -25,13 +25,47 @@
 
    ``` Manually render this view (and all of its children) to the given Canvas.```
 
-   ​
 
 
 
 
+## setContentView与LayoutInflater加载解析机制分析
 
+1. Window PhoneWindow DecorView Activity关系
 
+   * Window为抽象类 提供绘制窗口通用api
 
+   * PhoneWindow 实现Window
 
+   * DecorView为PhoneWindow内部类 是所有Activity界面的根View
 
+2. Activity - setContentView
+
+   1. PhoneWindow - setContentView
+
+      用于将资源文件通过Layoutinflater转换为View树 ,并添加到mContentParent视图中
+
+   2. PhoneWindow -installDecor
+
+      根据窗口对应的style修饰相依的样式
+
+   3. Activity-onContentChanged
+
+      方法为空 通过attach调用 当activity布局改动时调用 (finViewById()建议放入)
+
+   PhoneWindow类的setContentView方法最后通过调运`mLayoutInflater.inflate(layoutResID, mContentParent);`或者`mContentParent.addView(view, params);`语句将我们的xml或者JavaView插入到了mContentParent（id为content的FrameLayout对象）ViewGroup中。最后setContentView还会调用一个Callback接口的成员函数onContentChanged来通知对应的Activity组件视图内容发生了变化。
+
+	4. 整体流程
+     1. 创建DecorView对象mView , 该mView对象作为整个应用窗口的根视图
+     2. 根据Feature等style theme创建不同的窗口修饰布局  通过findViewById获取Activity布局文件该存放				    	的地方(id为content的FrameLayout)
+     3. 将Activity的布局文件添加至id为content的FrameLayout内
+
+​		***到这里 Activity还是没有显示出来页面***
+
+3. setContentView完成后Activity显示界面
+
+   Activity调运完ActivityThread的main(实际上Activity的开始)方法后 , 调用ActivityThread类的performLaunchActivity来创建要启动的Activity组件 ,这个过程中为该Activity组件创建窗口对象和视图对象 ,调运ActivityThread类的handleResumeActivity将它激活
+
+    
+
+​	
