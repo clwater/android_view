@@ -65,6 +65,8 @@
 
    Activity调运完ActivityThread的main(实际上Activity的开始)方法后 , 调用ActivityThread类的performLaunchActivity来创建要启动的Activity组件 ,这个过程中为该Activity组件创建窗口对象和视图对象 ,调运ActivityThread类的handleResumeActivity将它激活
 
+   ​	handleResumeActivity中 r.activity.makeVisible()  -> Activity - mDector.setVisibility(View.VISIBLE) 
+
     
 
 ​	
