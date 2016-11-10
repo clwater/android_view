@@ -2,30 +2,77 @@
 
 > 学习Android View框架，了解View的测量、布局、绘制过程，掌握常用的线性布局、相对布局的实现原理和用法，掌握ViewStub、include等高级用法，掌握ListView/RecyclerView的优化方法。
 
-
 ##  View的测量、布局、绘制过程
+
+0. 开始于ViewRootImpl 
+
+   * performTraversals()
+
+     ```ache mView since it is used so much below…```
+
+     根据之前设置的状态 判断是否measure layout draw
+
+   * getRootMeasureSpec()
+
+     ``` Figures out the measure spec for the root view in a window based on it's layout params.```
 
 1. measure操作 用于确定视图宽度和长度
 
    ```This is called to find out how big a view should be. The parent supplies constraint information in the width and height parameters.```
 
-   1. onMeasure()，视图大小的将在这里最终确定 通过setMeasuredDimension(width, height)保存计算结果
+   * 根据父视图和自身决定宽和高
+
+
+   * onMeasure()，视图大小的将在这里最终确定 通过setMeasuredDimension(width, height)保存计算结果
+
+     mMeasuredWidth和mMeasuredHeight赋值 view测量结束
+
+   * onMesure() - getDefaultSize()
+
+      ```Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.```
+
+   * MeasureSpec（View的内部类）测量规格为int型，值由高2位规格模式specMode和低30位具体尺寸specSize组成
+
+     * MeasureSpec.EXACTLY //确定模式，父View希望子View的大小是确定的，由specSize决定；
+     * MeasureSpec.AT_MOST //最多模式，父View希望子View的大小最多是specSize指定的值；
+     * MeasureSpec.UNSPECIFIED //未指定模式，父View完全依据子View的设计值来决定； 
+
+   * getSuggestedMinimumWidth/getSuggestedMinimumHeight
+
+     最小宽度和高度由View的Background尺寸与minX属性共同设置
+
+   * ViewGroup在搞事情
+
+     * ViewGroup中存在嵌套现象 使得measure递归传递 measureChild measureChildWithMargins(padding和margin)
+
+     * measureChildWithMargins
+
+       ```Ask one of the children of this view to measure itself, taking into account both the MeasureSpec requirements for this view and its padding and margins. ``` 
+
+       ​
+
+       ​
 
    ​
 
 2. layout操作 用于确定视图在屏幕中显示的位置
 
-   ```Assign a size and position to a view and all of its descendant```
+   ```Assign a size and position to a view and all of its descendants This is the second phase of the layout mechanism.```
 
-   1. setFrame(l,t,r,b)  保存子视图在父视图中的具体位置
-   2. onLayout() 为viewGroup类型布局子视图
+   1. onLayout()
+
+      空方法  	view类中可以在子类重写  viewgroup类中与子类中重写
+
+      得到View位置分配后的mLeft mRight mBottom mTop
+
+   ​
 
 3. draw操作 将视图显示到屏幕中
 
    ``` Manually render this view (and all of its children) to the given Canvas.```
 
 
-
+   1. 绘制背景()
 
 
 ## setContentView与LayoutInflater加载解析机制分析
