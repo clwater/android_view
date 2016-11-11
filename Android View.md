@@ -49,11 +49,24 @@
 
        ```Ask one of the children of this view to measure itself, taking into account both the MeasureSpec requirements for this view and its padding and margins. ``` 
 
-       ​
+       对父视图提供的measureSpec参数结合自身的LayoutParams参数进行调整
 
-       ​
 
-   ​
+   * other
+
+     * MeasureSpec
+
+       ```A MeasureSpec encapsulates the layout requirements passed from parent to child.```
+
+     * measure为final 只能通过重载onMeasure自定义测量逻辑
+
+     * DecorView的MeasureSPec由ViewRootImpl中getRootMeasureSpec方法确定
+
+     * measureChild和measureChildWithMargins简化了父子VIew的尺寸计算
+
+     * ViewGroup的子类就必须要求LayoutParams继承子MarginLayoutParams，否则无法使用layout_margin参数(?)
+
+     * View的getMeasuredWidth()和getMeasuredHeight()方法来获取View测量的宽高，要必须保证这两个方法在onMeasure流程之后被调用才能返回有效值。
 
 2. layout操作 用于确定视图在屏幕中显示的位置
 
