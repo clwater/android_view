@@ -2,7 +2,7 @@
 
 > 学习Android View框架，了解View的测量、布局、绘制过程，掌握常用的线性布局、相对布局的实现原理和用法，掌握ViewStub、include等高级用法，掌握ListView/RecyclerView的优化方法。
 
-##  View的测量、布局、绘制过程
+##  View的测量、布局、绘制过程 
 
 0. 开始于ViewRootImpl 
 
@@ -71,6 +71,9 @@
 2. layout操作 用于确定视图在屏幕中显示的位置
 
    ```Assign a size and position to a view and all of its descendants This is the second phase of the layout mechanism.```
+
+   0. mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
+
 
    1. onLayout()
 
