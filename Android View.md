@@ -176,7 +176,7 @@
         * 借助onDraw中传入的canvas类进行
         * 递归顺序和添加顺序一致 可以通过ViewGroup.getChildDrawingOrder()方法重载后修改
 
-   ​
+4. View 的invalidate和postlnvalidate方法
 
    ​
 
