@@ -23,13 +23,13 @@
    * 根据父视图和自身决定宽和高
 
 
-   * onMeasure()，视图大小的将在这里最终确定 通过setMeasuredDimension(width, height)保存计算结果
+*  onMeasure()，视图大小的将在这里最终确定 通过setMeasuredDimension(width, height)保存计算结果
 
-     mMeasuredWidth和mMeasuredHeight赋值 view测量结束
+   mMeasuredWidth和mMeasuredHeight赋值 view测量结束
 
-   * onMesure() - getDefaultSize()
+*  onMesure() - getDefaultSize()
 
-      ```Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.```
+       ​```Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.```
 
    * MeasureSpec（View的内部类）测量规格为int型，值由高2位规格模式specMode和低30位具体尺寸specSize组成
 
@@ -52,7 +52,7 @@
        对父视图提供的measureSpec参数结合自身的LayoutParams参数进行调整
 
 
-   * other
+*    other
 
      * MeasureSpec
 
@@ -74,24 +74,114 @@
 
    0. mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
+      相对于parent 的左上右下坐标
 
-   1. onLayout()
+   1. layout 判读view的位置是否变更 判断是否需要重新layout
 
-      空方法  	view类中可以在子类重写  viewgroup类中与子类中重写
+   2. onLayout()
+
+      空方法  	view类中可以在子类重写  viewgroup类中于子类中重写
 
       得到View位置分配后的mLeft mRight mBottom mTop
 
-   ​
+   3. other
+
+      顶层父View向子View递归调用view.layout
+
+      得到对每个view进行位置分配后的mLedt , mTop , mRight , mBottom
+
+      layout_XXX等布局属性针对包含子View的ViewGroup
+
+      使用VIew的getWidth和getHeight需要等到onLayout执行之后
+
+  
 
 3. draw操作 将视图显示到屏幕中
 
    ``` Manually render this view (and all of its children) to the given Canvas.```
 
+   draw
 
-   1. 绘制背景()
+   ```java
+   	 /*
+   	 * Draw traversal performs several drawing steps which must be executed
+        * in the appropriate order:
+        *
+        *      1. Draw the background
+        *      2. If necessary, save the canvas' layers to prepare for fading
+        *      3. Draw view's content
+        *      4. Draw children
+        *      5. If necessary, draw the fading edges and restore layers
+        *      6. Draw decorations (scrollbars for instance)
+        *		...
+        * 		skip step 2 & 5 if possible (common case)
+        *		...
+        */
+   ```
 
+
+   1.    Draw the background
+
+        drawBackground(canvas)
+
+        实现了背景的绘制 通过layout中view位置来设置背景的绘制区域 调用Drawable的draw方法来完成背景的绘制工作
+
+   2.   save the canvas' layers
+
+        ```java
+        if (drawTop) {
+          canvas.saveLayer(left, top, right, top + length, null, flags);}
+
+        ```
+
+        保存layer缺省情况下只有个layer 一般情况不进行这个操作
+
+   3.   draw the content
+
+        * onDraw(canvas); 调用onDraw方法绘制
+
+        * onDraw(canvas) 	
+
+          ```Implement this to do your drawing```
+
+          空方法  需要子类实现
+
+   4.   Draw children
+
+        * 对当前View的所有子View进行绘制 如果有
+
+        * dispatchDraw(canvas);
+
+        * dispatchDraw()
+
+          ```Called by draw to draw the child views```
+
+        * View中dispatchDraw方法为空 ViewGroup中实现该方法
+
+        * 遍历ViewGroup中的子VIew通过调用drawChild()方法 调用子View draw()方法 
+
+   5.   draw the fade effect and restore layers
+
+        绘制阴影效果和回复layer层
+
+   6.   draw decorations (scrollbars)
+
+        * 绘制滚动条
+        * onDrawForeground(canvas);
+
+   7.   other
+
+        * ViewGroup会递归其包含的子View
+        * 绘制需要在子类中实现
+        * 借助onDraw中传入的canvas类进行
+        * 递归顺序和添加顺序一致 可以通过ViewGroup.getChildDrawingOrder()方法重载后修改
+
+   ​
+
+   ​
 
 ## setContentView与LayoutInflater加载解析机制分析
+
 ### setContentView分析
 
 1. Window PhoneWindow DecorView Activity关系
@@ -139,14 +229,14 @@
 
 2.   LayoutInflater.inflate()们 
 
-     ```Inflate a new view hierarchy from the specified xml resource```
+       ```Inflate a new view hierarchy from the specified xml resource```
 
 3.   LayoutInflater.inflate() - rInflate()
 
-     ```Recursive method used to descend down the xml hierarchy and instantiate views, instantiate their children```
+       ```Recursive method used to descend down the xml hierarchy and instantiate views, instantiate their children```
 
-     parent的所有子节点都inflate完毕的时候回onFinishInflate方法 onFinishInflate()为空方法  可以添加自定义逻辑
+       parent的所有子节点都inflate完毕的时候回onFinishInflate方法 onFinishInflate()为空方法  可以添加自定义逻辑
 
-     ​
+       ​
 
-     ​
+       ​
