@@ -237,6 +237,8 @@
 
        parent的所有子节点都inflate完毕的时候回onFinishInflate方法 onFinishInflate()为空方法  可以添加自定义逻辑
 
-       ​
+     ​
 
-       ​
+     # LinearLayout
+
+       
