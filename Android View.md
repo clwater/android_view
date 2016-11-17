@@ -241,4 +241,58 @@
 
      # LinearLayout
 
-       
+     > View的measure方法为final 只能通过重载onMeasure实现组件自己的测量逻辑
+
+     1. onMeasure
+
+     ```java
+     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {  
+     	if (mOrientation == VERTICAL) {
+             measureVertical(widthMeasureSpec, heightMeasureSpec);
+         } else {
+             measureHorizontal(widthMeasureSpec, heightMeasureSpec);
+         }
+     }
+     ```
+     判断布局方向
+
+     2. measureVertical (measureVertical 与measureHorizontal实现类似)
+
+        ```Measures the children when the orientation of this LinearLayout is set to {@link #VERTICAL}.```
+
+        ​
+
+        ​
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
