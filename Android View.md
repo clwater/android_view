@@ -29,7 +29,7 @@
 
 *  onMesure() - getDefaultSize()
 
-       ​```Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.```
+        ​```Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.```
 
    * MeasureSpec（View的内部类）测量规格为int型，值由高2位规格模式specMode和低30位具体尺寸specSize组成
 
@@ -94,17 +94,17 @@
 
       使用VIew的getWidth和getHeight需要等到onLayout执行之后
 
-  
 
-3. draw操作 将视图显示到屏幕中
 
-   ``` Manually render this view (and all of its children) to the given Canvas.```
+3.   draw操作 将视图显示到屏幕中
 
-   draw
+     ``` Manually render this view (and all of its children) to the given Canvas.```
 
-   ```java
-   	 /*
-   	 * Draw traversal performs several drawing steps which must be executed
+     draw
+
+     ```java
+     	 /*
+     * Draw traversal performs several drawing steps which must be executed
         * in the appropriate order:
         *
         *      1. Draw the background
@@ -117,6 +117,7 @@
         * 		skip step 2 & 5 if possible (common case)
         *		...
         */
+     ```
    ```
 
 
@@ -132,53 +133,53 @@
         if (drawTop) {
           canvas.saveLayer(left, top, right, top + length, null, flags);}
 
-        ```
+   ```
 
         保存layer缺省情况下只有个layer 一般情况不进行这个操作
 
-   3.   draw the content
+3.    draw the content
 
-        * onDraw(canvas); 调用onDraw方法绘制
+      * onDraw(canvas); 调用onDraw方法绘制
 
-        * onDraw(canvas) 	
+        * onDraw(canvas) 
 
-          ```Implement this to do your drawing```
+        ```Implement this to do your drawing```
 
-          空方法  需要子类实现
+        空方法  需要子类实现
 
-   4.   Draw children
+4.    Draw children
 
-        * 对当前View的所有子View进行绘制 如果有
+      * 对当前View的所有子View进行绘制 如果有
 
-        * dispatchDraw(canvas);
+      * dispatchDraw(canvas);
 
-        * dispatchDraw()
+      * dispatchDraw()
 
-          ```Called by draw to draw the child views```
+        ```Called by draw to draw the child views```
 
-        * View中dispatchDraw方法为空 ViewGroup中实现该方法
+      * View中dispatchDraw方法为空 ViewGroup中实现该方法
 
-        * 遍历ViewGroup中的子VIew通过调用drawChild()方法 调用子View draw()方法 
+      * 遍历ViewGroup中的子VIew通过调用drawChild()方法 调用子View draw()方法 
 
-   5.   draw the fade effect and restore layers
+5.    draw the fade effect and restore layers
 
-        绘制阴影效果和回复layer层
+           绘制阴影效果和回复layer层
 
-   6.   draw decorations (scrollbars)
+      6.   draw decorations (scrollbars)
 
-        * 绘制滚动条
-        * onDrawForeground(canvas);
+           * 绘制滚动条
+           * onDrawForeground(canvas);
 
-   7.   other
+      7.   other
 
-        * ViewGroup会递归其包含的子View
-        * 绘制需要在子类中实现
-        * 借助onDraw中传入的canvas类进行
-        * 递归顺序和添加顺序一致 可以通过ViewGroup.getChildDrawingOrder()方法重载后修改
+           * ViewGroup会递归其包含的子View
+           * 绘制需要在子类中实现
+           * 借助onDraw中传入的canvas类进行
+           * 递归顺序和添加顺序一致 可以通过ViewGroup.getChildDrawingOrder()方法重载后修改
 
-4. View 的invalidate和postlnvalidate方法
+6.    View 的invalidate和postlnvalidate方法
 
-   ​
+      ​
 
 ## setContentView与LayoutInflater加载解析机制分析
 
@@ -229,17 +230,17 @@
 
 2.   LayoutInflater.inflate()们 
 
-       ```Inflate a new view hierarchy from the specified xml resource```
+         ​```Inflate a new view hierarchy from the specified xml resource```
 
 3.   LayoutInflater.inflate() - rInflate()
 
-       ```Recursive method used to descend down the xml hierarchy and instantiate views, instantiate their children```
+         ​```Recursive method used to descend down the xml hierarchy and instantiate views, instantiate their children```
 
-       parent的所有子节点都inflate完毕的时候回onFinishInflate方法 onFinishInflate()为空方法  可以添加自定义逻辑
+         parent的所有子节点都inflate完毕的时候回onFinishInflate方法 onFinishInflate()为空方法  可以添加自定义逻辑
 
-     ​
+       ​
 
-     # LinearLayout
+       # LinearLayout
 
      > View的measure方法为final 只能通过重载onMeasure实现组件自己的测量逻辑
 
@@ -262,13 +263,10 @@
 
         ​
 
-        ​
+     3. other
 
-
-
-
-
-
+        * 根据LinearLayout模式分成两部分 EXACTLY模式下且weight不为0 且高度为0的子View优先级低 如果LinearLayout剩余空间不足则不显示 但是如果是AT_MOST的weight不为0 企鹅高度设置为0会优先获得高度
+        * 为LinearLayout动态添加子View的时候，子View的LayoutParams一定要是LinearLayout的内部类(ViewGroup通用)
 
 
 
