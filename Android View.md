@@ -261,7 +261,180 @@
 
         ```Measures the children when the orientation of this LinearLayout is set to {@link #VERTICAL}.```
 
-        ​
+        * 相关变量 
+
+          ```java
+             //记录内部使用的高度 不是LinearLayout的高度 =-= 
+              mTotalLength = 0;
+          	//所有子View中 宽度最大的值
+              int maxWidth = 0;
+          	//子View的测量状态 (通过combineMeasuredStates 按位相或 合并)
+              int childState = 0;
+          	
+          	//当matchWidthLocally参数为真时 跟当前子控件的左右margin和相比较取大值
+          	//weight<=0的View最大值
+              int alternativeMaxWidth = 0;
+          	//weight>0的View 的最大值
+              int weightedMaxWidth = 0;
+          	//是否子View均为match_Parent 判断是否需要重新测量
+              boolean allFillParent = true;
+              //weight的和
+              float totalWeight = 0;
+
+              //子View的数量 下一级的数量 而不是所有子View的数量
+              final int count = getVirtualChildCount();
+
+          	//高度宽度模式
+              final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+              final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+          	
+          	//判断子View是否为match_parent matchWidthLocally 觉得了子View 的测量时父View干预		//还是填充父View
+              boolean matchWidth = false;
+              boolean skippedMeasure = false;
+
+              final int baselineChildIndex = mBaselineAlignedChildIndex;        
+              final boolean useLargestChild = mUseLargestChild;
+
+              int largestChildHeight = Integer.MIN_VALUE;
+          ```
+
+        * 测量
+
+          ```java
+                 for (int i = 0; i < count; ++i) {
+                      final View child = getVirtualChildAt(i);
+
+                      if (child == null) {
+                        	//measureNullChild() 任何情况下均返回0 
+                          mTotalLength += measureNullChild(i);
+                          continue;
+                      }
+          			//Visibility为Gone的时候跳过该View
+                   	//getChildrenSkipCount() 方法同样任何情况下均返回0
+                      if (child.getVisibility() == View.GONE) {
+                         i += getChildrenSkipCount(child, i);
+                         continue;
+                      }
+
+                      //根据showDivider的值(通过hasDividerBeforeChildAt()) 来决定当前子View
+                   	//是否需要添加drvider的高度
+                      if (hasDividerBeforeChildAt(i)) {
+                          mTotalLength += mDividerHeight;
+                      }
+                      //父容器在add,measure时会将子View的LayoutParams 强转为自己的类型
+                      LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
+
+                      //权重
+                      totalWeight += lp.weight;
+                      
+
+                      /*
+                      *当LinearLayout是EXACLY模式 子View的高度为0 权重大于0
+                      *在LinearLayout高度有剩余的时候会根据权重分配高度(二次测量)
+                      */
+                      if (heightMode == MeasureSpec.EXACTLY && lp.height == 0 && lp.weight > 0) {
+                          // Optimization: don't bother measuring children who are going to use
+                          // leftover space. These views will get measured again down below if
+                          // there is any leftover space.
+                          final int totalLength = mTotalLength;
+                          mTotalLength = Math.max(totalLength, totalLength + lp.topMargin + lp.bottomMargin);
+                          skippedMeasure = true;
+                      } else {
+
+                          //反之
+                          int oldHeight = Integer.MIN_VALUE;
+
+                          if (lp.height == 0 && lp.weight > 0) {
+
+                              //将子VIew的高度设置为-1(WRAP_CONTCNT)
+                              // heightMode is either UNSPECIFIED or AT_MOST, and this
+                              // child wanted to stretch to fill available space.
+                              // Translate that to WRAP_CONTENT so that it does not end up
+                              // with a height of 0
+                              oldHeight = 0;
+                              lp.height = LayoutParams.WRAP_CONTENT;
+                          }
+
+                          // Determine how big this child would like to be. If this or
+                          // previous children have given a weight, then we allow it to
+                          // use all available space (and we will shrink things later
+                          // if needed).
+
+                          //开始测量子VIew
+                          //当LinearLayout不是EXACLY模式 且子VIew的weight大于0 会优先把LIinearLayout的全部可用高度用于子View的测量
+                          measureChildBeforeLayout(
+                                 child, i, widthMeasureSpec, 0, heightMeasureSpec,
+                                 totalWeight == 0 ? mTotalLength : 0);
+
+
+                          //重置子VIew高度 
+                          if (oldHeight != Integer.MIN_VALUE) {
+                             lp.height = oldHeight;
+                          }
+
+                          final int childHeight = child.getMeasuredHeight();
+                          final int totalLength = mTotalLength;
+                          
+                          //merage值
+                          mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin +
+                                 lp.bottomMargin + getNextLocationOffset(child));
+
+
+                          if (useLargestChild) {
+                              largestChildHeight = Math.max(childHeight, largestChildHeight);
+                          }
+                      }
+
+                      /**
+                       * If applicable, compute the additional offset to the child's baseline
+                       * we'll need later when asked {@link #getBaseline}.
+                       */
+                      if ((baselineChildIndex >= 0) && (baselineChildIndex == i + 1)) {
+                         mBaselineChildTop = mTotalLength;
+                      }
+
+                      // if we are trying to use a child index for our baseline, the above
+                      // book keeping only works if there are no children above it with
+                      // weight.  fail fast to aid the developer.
+                      if (i < baselineChildIndex && lp.weight > 0) {
+                          throw new RuntimeException("A child of LinearLayout with index "
+                                  + "less than mBaselineAlignedChildIndex has weight > 0, which "
+                                  + "won't work.  Either remove the weight, or don't set "
+                                  + "mBaselineAlignedChildIndex.");
+                      }
+
+                      boolean matchWidthLocally = false;
+                      if (widthMode != MeasureSpec.EXACTLY && lp.width == LayoutParams.MATCH_PARENT) {
+                          // The width of the linear layout will scale, and at least one
+                          // child said it wanted to match our width. Set a flag
+                          // indicating that we need to remeasure at least that view when
+                          // we know our width.
+                          matchWidth = true;
+                          matchWidthLocally = true;
+                      }
+
+                      final int margin = lp.leftMargin + lp.rightMargin;
+                      final int measuredWidth = child.getMeasuredWidth() + margin;
+                      maxWidth = Math.max(maxWidth, measuredWidth);
+                      childState = combineMeasuredStates(childState, child.getMeasuredState());
+
+                      allFillParent = allFillParent && lp.width == LayoutParams.MATCH_PARENT;
+                      if (lp.weight > 0) {
+                          /*
+                           * Widths of weighted Views are bogus if we end up
+                           * remeasuring, so keep them separate.
+                           */
+                          weightedMaxWidth = Math.max(weightedMaxWidth,
+                                  matchWidthLocally ? margin : measuredWidth);
+                      } else {
+                          alternativeMaxWidth = Math.max(alternativeMaxWidth,
+                                  matchWidthLocally ? margin : measuredWidth);
+                      }
+
+                      i += getChildrenSkipCount(child, i);
+                  }
+          ```
+          ​
 
      3. other
 

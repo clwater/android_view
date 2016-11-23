@@ -19,15 +19,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        linearLayout = (LinearLayout) findViewById(R.id.mylayout);
-        testbtn = (TextButton) findViewById(R.id.test_mybtn);
-
-        linearLayout.setOnTouchListener(this);
-        testbtn.setOnTouchListener(this);
-
-        linearLayout.setOnClickListener(this);
-        testbtn.setOnClickListener(this);
+//
+//        linearLayout = (LinearLayout) findViewById(R.id.mylayout);
+//        testbtn = (TextButton) findViewById(R.id.test_mybtn);
+//
+//        linearLayout.setOnTouchListener(this);
+//        testbtn.setOnTouchListener(this);
+//
+//        linearLayout.setOnClickListener(this);
+//        testbtn.setOnClickListener(this);
     }
 
 
