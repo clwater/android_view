@@ -327,38 +327,26 @@
                       //权重
                       totalWeight += lp.weight;
                       
-
-                      /*
-                      *当LinearLayout是EXACLY模式 子View的高度为0 权重大于0
-                      *在LinearLayout高度有剩余的时候会根据权重分配高度(二次测量)
-                      */
+          			//weight 相关分支
+                      
+                      //当LinearLayout是EXACLY模式或有具体的值) 子View的高度为0 weight大于0
+                      //在LinearLayout高度有剩余的时候会根据权重分配高度(二次测量)
                       if (heightMode == MeasureSpec.EXACTLY && lp.height == 0 && lp.weight > 0) {
-                          // Optimization: don't bother measuring children who are going to use
-                          // leftover space. These views will get measured again down below if
-                          // there is any leftover space.
                           final int totalLength = mTotalLength;
                           mTotalLength = Math.max(totalLength, totalLength + lp.topMargin + lp.bottomMargin);
                           skippedMeasure = true;
                       } else {
 
-                          //反之
+                          //其他情况
                           int oldHeight = Integer.MIN_VALUE;
 
                           if (lp.height == 0 && lp.weight > 0) {
-
+          					//相当于父类为为wrap_layout 或者为UNSPECIFIED模式
                               //将子VIew的高度设置为-1(WRAP_CONTCNT)
-                              // heightMode is either UNSPECIFIED or AT_MOST, and this
-                              // child wanted to stretch to fill available space.
-                              // Translate that to WRAP_CONTENT so that it does not end up
-                              // with a height of 0
+          					//防止子空间高度为0
                               oldHeight = 0;
                               lp.height = LayoutParams.WRAP_CONTENT;
                           }
-
-                          // Determine how big this child would like to be. If this or
-                          // previous children have given a weight, then we allow it to
-                          // use all available space (and we will shrink things later
-                          // if needed).
 
                           //开始测量子VIew
                           //当LinearLayout不是EXACLY模式 且子VIew的weight大于0 会优先把LIinearLayout的全部可用高度用于子View的测量
@@ -375,9 +363,9 @@
                           final int childHeight = child.getMeasuredHeight();
                           final int totalLength = mTotalLength;
                           
-                          //merage值
-                          mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin +
-                                 lp.bottomMargin + getNextLocationOffset(child));
+                          //getNextLocationOffset()返回0 
+                         //比较child测量前后总高度 取较大值
+                          mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
 
 
                           if (useLargestChild) {
@@ -385,30 +373,21 @@
                           }
                       }
 
-                      /**
-                       * If applicable, compute the additional offset to the child's baseline
-                       * we'll need later when asked {@link #getBaseline}.
-                       */
+                      
                       if ((baselineChildIndex >= 0) && (baselineChildIndex == i + 1)) {
                          mBaselineChildTop = mTotalLength;
                       }
 
-                      // if we are trying to use a child index for our baseline, the above
-                      // book keeping only works if there are no children above it with
-                      // weight.  fail fast to aid the developer.
                       if (i < baselineChildIndex && lp.weight > 0) {
-                          throw new RuntimeException("A child of LinearLayout with index "
-                                  + "less than mBaselineAlignedChildIndex has weight > 0, which "
-                                  + "won't work.  Either remove the weight, or don't set "
-                                  + "mBaselineAlignedChildIndex.");
+                          throw new RuntimeException("A child of LinearLayout with index " + "less than mBaselineAlignedChildIndex has weight > 0, which "
+            + "won't work.  Either remove the weight, or don't set "+ "mBaselineAlignedChildIndex.");
                       }
 
                       boolean matchWidthLocally = false;
+                   	//当父View非EXACTLY或精确值 子View为match_parent
+                   	//matchWidthLocally和matchWidth置为true
+                   	//该View或占据父View水平方向所有空间
                       if (widthMode != MeasureSpec.EXACTLY && lp.width == LayoutParams.MATCH_PARENT) {
-                          // The width of the linear layout will scale, and at least one
-                          // child said it wanted to match our width. Set a flag
-                          // indicating that we need to remeasure at least that view when
-                          // we know our width.
                           matchWidth = true;
                           matchWidthLocally = true;
                       }
