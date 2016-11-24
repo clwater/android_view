@@ -414,15 +414,48 @@
                     }
              ```
 
-        *    other
+        *    测量相关
 
              - 根据LinearLayout模式分成两部分 EXACTLY模式下且weight不为0 且高度为0的子View优先级低 如果LinearLayout剩余空间不足则不显示 但是如果是AT_MOST的weight不为0 企鹅高度设置为0会优先获得高度
              - 为LinearLayout动态添加子View的时候，子View的LayoutParams一定要是LinearLayout的内部类(ViewGroup通用)
 
+        *    weight - weight的再次测量
 
-​	
-
- 3. ​
+             ```java
+                     //useLargestChild属性相关
+                     if (mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
+                         mTotalLength += mDividerHeight;
+                     }
+                     if (useLargestChild &&
+                             (heightMode == MeasureSpec.AT_MOST || heightMode == MeasureSpec.UNSPECIFIED)) {
+                         mTotalLength = 0;
+                         for (int i = 0; i < count; ++i) {
+                             final View child = getVirtualChildAt(i);
+                             if (child == null) {
+                                 mTotalLength += measureNullChild(i);
+                                 continue;
+                             }
+                             if (child.getVisibility() == GONE) {
+                                 i += getChildrenSkipCount(child, i);
+                                 continue;
+                             }
+                             final LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)
+                                     child.getLayoutParams();
+                             // Account for negative margins
+                             final int totalLength = mTotalLength;
+                             mTotalLength = Math.max(totalLength, totalLength + largestChildHeight +
+                                     lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
+                         }
+                     }
+                     // Add in our padding
+                     mTotalLength += mPaddingTop + mPaddingBottom;
+                     int heightSize = mTotalLength;
+                     // Check against our minimum height
+                     heightSize = Math.max(heightSize, getSuggestedMinimumHeight());
+                     // Reconcile our calculated size with the heightMeasureSpec
+                     int heightSizeAndState = resolveSizeAndState(heightSize, heightMeasureSpec, 0);
+                     heightSize = heightSizeAndState & MEASURED_SIZE_MASK;
+             ```
 
 
 
