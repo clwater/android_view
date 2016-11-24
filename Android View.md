@@ -29,7 +29,7 @@
 
 *  onMesure() - getDefaultSize()
 
-         ​```Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.```
+          ```Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.```
 
    * MeasureSpec（View的内部类）测量规格为int型，值由高2位规格模式specMode和低30位具体尺寸specSize组成
 
@@ -121,21 +121,25 @@
    ```
 
 
-   1.    Draw the background
-
-        drawBackground(canvas)
-
-        实现了背景的绘制 通过layout中view位置来设置背景的绘制区域 调用Drawable的draw方法来完成背景的绘制工作
-
-   2.   save the canvas' layers
-
-        ```java
-        if (drawTop) {
-          canvas.saveLayer(left, top, right, top + length, null, flags);}
 
    ```
 
+1.    Draw the background
+
+        drawBackground(canvas)
+
+      实现了背景的绘制 通过layout中view位置来设置背景的绘制区域 调用Drawable的draw方法来完成背景的绘制工作  
+
+
+
+2.    save the canvas' layers
+
+      if (drawTop) {
+        canvas.saveLayer(left, top, right, top + length, null, flags);}
+
         保存layer缺省情况下只有个layer 一般情况不进行这个操作
+
+
 
 3.    draw the content
 
@@ -163,23 +167,25 @@
 
 5.    draw the fade effect and restore layers
 
-              绘制阴影效果和回复layer层
+       绘制阴影效果和回复layer层
 
-      6.   draw decorations (scrollbars)
+6.    draw decorations (scrollbars)
 
-           * 绘制滚动条
-           * onDrawForeground(canvas);
+      - 绘制滚动条
+      - onDrawForeground(canvas);
 
-      7.   other
+7.    other
 
-           * ViewGroup会递归其包含的子View
-           * 绘制需要在子类中实现
-           * 借助onDraw中传入的canvas类进行
-           * 递归顺序和添加顺序一致 可以通过ViewGroup.getChildDrawingOrder()方法重载后修改
+      - ViewGroup会递归其包含的子View
+      - 绘制需要在子类中实现
+      - 借助onDraw中传入的canvas类进行
+      - 递归顺序和添加顺序一致 可以通过ViewGroup.getChildDrawingOrder()方法重载后修改
 
-6.    View 的invalidate和postlnvalidate方法
+      ​
 
-         ​
+8.    View 的invalidate和postlnvalidate方法()
+
+      ​
 
 ## setContentView与LayoutInflater加载解析机制分析
 
@@ -230,17 +236,16 @@
 
 2.   LayoutInflater.inflate()们 
 
-           ​```Inflate a new view hierarchy from the specified xml resource```
+      ```Inflate a new view hierarchy from the specified xml resource```
 
 3.   LayoutInflater.inflate() - rInflate()
 
-           ​```Recursive method used to descend down the xml hierarchy and instantiate views, instantiate their children```
+      ```Recursive method used to descend down the xml hierarchy and instantiate views, instantiate their children```
 
-           parent的所有子节点都inflate完毕的时候回onFinishInflate方法 onFinishInflate()为空方法  可以添加自定义逻辑
+     parent的所有子节点都inflate完毕的时候回onFinishInflate方法 onFinishInflate()为空方法  可以添加自定义逻辑
 
-         ​
+     ## LinearLayout
 
-         # LinearLayout
 
      > View的measure方法为final 只能通过重载onMeasure实现组件自己的测量逻辑
 
@@ -261,165 +266,163 @@
 
         ```Measures the children when the orientation of this LinearLayout is set to {@link #VERTICAL}.```
 
-        * 相关变量 
+        *    相关变量 
 
-          ```java
-             //记录内部使用的高度 不是LinearLayout的高度 =-= 
-              mTotalLength = 0;
-          	//所有子View中 宽度最大的值
-              int maxWidth = 0;
-          	//子View的测量状态 (通过combineMeasuredStates 按位相或 合并)
-              int childState = 0;
-          	
-          	//当matchWidthLocally参数为真时 跟当前子控件的左右margin和相比较取大值
-          	//weight<=0的View最大值
-              int alternativeMaxWidth = 0;
-          	//weight>0的View 的最大值
-              int weightedMaxWidth = 0;
-          	//是否子View均为match_Parent 判断是否需要重新测量
-              boolean allFillParent = true;
-              //weight的和
-              float totalWeight = 0;
+             ```java
+                //记录内部使用的高度 不是LinearLayout的高度 =-= 
+                 mTotalLength = 0;
+             	//所有子View中 宽度最大的值
+                 int maxWidth = 0;
+             	//子View的测量状态 (通过combineMeasuredStates 按位相或 合并)
+                 int childState = 0;
+             	
+             	//当matchWidthLocally参数为真时 跟当前子控件的左右margin和相比较取大值
+             	//weight<=0的View最大值
+                 int alternativeMaxWidth = 0;
+             	//weight>0的View 的最大值
+                 int weightedMaxWidth = 0;
+             	//是否子View均为match_Parent 判断是否需要重新测量
+                 boolean allFillParent = true;
+                 //weight的和
+                 float totalWeight = 0;
 
-              //子View的数量 下一级的数量 而不是所有子View的数量
-              final int count = getVirtualChildCount();
+                 //子View的数量 下一级的数量 而不是所有子View的数量
+                 final int count = getVirtualChildCount();
 
-          	//高度宽度模式
-              final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-              final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-          	
-          	//判断子View是否为match_parent matchWidthLocally 觉得了子View 的测量时父View干预		//还是填充父View
-              boolean matchWidth = false;
-              boolean skippedMeasure = false;
+             	//高度宽度模式
+                 final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+                 final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+             	
+             	//判断子View是否为match_parent matchWidthLocally 觉得了子View 的测量时父View干预		//还是填充父View
+                 boolean matchWidth = false;
+                 boolean skippedMeasure = false;
 
-              final int baselineChildIndex = mBaselineAlignedChildIndex;        
-              final boolean useLargestChild = mUseLargestChild;
+                 final int baselineChildIndex = mBaselineAlignedChildIndex;        
+                 final boolean useLargestChild = mUseLargestChild;
 
-              int largestChildHeight = Integer.MIN_VALUE;
-          ```
+                 int largestChildHeight = Integer.MIN_VALUE;
+             ```
 
-        * 测量
+        *    测量
 
-          ```java
-                 for (int i = 0; i < count; ++i) {
-                      final View child = getVirtualChildAt(i);
+             ```java
+                    for (int i = 0; i < count; ++i) {
+                         final View child = getVirtualChildAt(i);
 
-                      if (child == null) {
-                        	//measureNullChild() 任何情况下均返回0 
-                          mTotalLength += measureNullChild(i);
-                          continue;
-                      }
-          			//Visibility为Gone的时候跳过该View
-                   	//getChildrenSkipCount() 方法同样任何情况下均返回0
-                      if (child.getVisibility() == View.GONE) {
-                         i += getChildrenSkipCount(child, i);
-                         continue;
-                      }
-
-                      //根据showDivider的值(通过hasDividerBeforeChildAt()) 来决定当前子View
-                   	//是否需要添加drvider的高度
-                      if (hasDividerBeforeChildAt(i)) {
-                          mTotalLength += mDividerHeight;
-                      }
-                      //父容器在add,measure时会将子View的LayoutParams 强转为自己的类型
-                      LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
-
-                      //权重
-                      totalWeight += lp.weight;
-                      
-          			//weight 相关分支
-                      
-                      //当LinearLayout是EXACLY模式或有具体的值) 子View的高度为0 weight大于0
-                      //在LinearLayout高度有剩余的时候会根据权重分配高度(二次测量)
-                      if (heightMode == MeasureSpec.EXACTLY && lp.height == 0 && lp.weight > 0) {
-                          final int totalLength = mTotalLength;
-                          mTotalLength = Math.max(totalLength, totalLength + lp.topMargin + lp.bottomMargin);
-                          skippedMeasure = true;
-                      } else {
-
-                          //其他情况
-                          int oldHeight = Integer.MIN_VALUE;
-
-                          if (lp.height == 0 && lp.weight > 0) {
-          					//相当于父类为为wrap_layout 或者为UNSPECIFIED模式
-                              //将子VIew的高度设置为-1(WRAP_CONTCNT)
-          					//防止子空间高度为0
-                              oldHeight = 0;
-                              lp.height = LayoutParams.WRAP_CONTENT;
-                          }
-
-                          //开始测量子VIew
-                          //当LinearLayout不是EXACLY模式 且子VIew的weight大于0 会优先把LIinearLayout的全部可用高度用于子View的测量
-                        	//实际上调用ViewGroup中的getChildMeasureSpec()
-                        	//当之前的weight为0 进行正常测量 否则LinearLayout传入0
-                        	//结合父View的MeasureSpec子View的LayoutParams 对子View进行测量
-                        	//在测量View之前 如果weight为0 需要考虑之前分配的高度 根据剩余来分配自身
-                        	//如果weight不为0 无需考虑 因为子View的高度会二次测量
-                          measureChildBeforeLayout(
-                                 child, i, widthMeasureSpec, 0, heightMeasureSpec,
-                                 totalWeight == 0 ? mTotalLength : 0);
-                         //重置子VIew高度 
-                                if (oldHeight != Integer.MIN_VALUE) {
-                                   lp.height = oldHeight;
-                                }
-
-                                final int childHeight = child.getMeasuredHeight();
-                                final int totalLength = mTotalLength;
-                                
-                                //getNextLocationOffset()返回0 
-                               //比较child测量前后总高度 取较大值
-                                mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
-                        
-                        if (useLargestChild) {
-                                    largestChildHeight = Math.max(childHeight, largestChildHeight);
-                                }
-                            }
-                   if ((baselineChildIndex >= 0) && (baselineChildIndex == i + 1)) {
-                               mBaselineChildTop = mTotalLength;
-                            }
-
-                            if (i < baselineChildIndex && lp.weight > 0) {
-                                throw new RuntimeException("A child of LinearLayout with index " + "less than mBaselineAlignedChildIndex has weight > 0, which "
-                  + "won't work.  Either remove the weight, or don't set "+ "mBaselineAlignedChildIndex.");
-                            }
-
-                            boolean matchWidthLocally = false;
-                         	//当父View非EXACTLY或精确值 子View为match_parent
-                         	//matchWidthLocally和matchWidth置为true
-                         	//该View或占据父View水平方向所有空间
-                            if (widthMode != MeasureSpec.EXACTLY && lp.width == LayoutParams.MATCH_PARENT) {
-                                matchWidth = true;
-                                matchWidthLocally = true;
-                            }
-
-                            final int margin = lp.leftMargin + lp.rightMargin;
-                            final int measuredWidth = child.getMeasuredWidth() + margin;
-                            maxWidth = Math.max(maxWidth, measuredWidth);
-                            childState = combineMeasuredStates(childState, child.getMeasuredState());
-
-                            allFillParent = allFillParent && lp.width == LayoutParams.MATCH_PARENT;
-                            if (lp.weight > 0) {
-                                weightedMaxWidth = Math.max(weightedMaxWidth,
-                                        matchWidthLocally ? margin : measuredWidth);
-                            } else {
-                                alternativeMaxWidth = Math.max(alternativeMaxWidth,
-                                        matchWidthLocally ? margin : measuredWidth);
-                            }
-
+                         if (child == null) {
+                           	//measureNullChild() 任何情况下均返回0 
+                             mTotalLength += measureNullChild(i);
+                             continue;
+                         }
+             			//Visibility为Gone的时候跳过该View
+                      	//getChildrenSkipCount() 方法同样任何情况下均返回0
+                         if (child.getVisibility() == View.GONE) {
                             i += getChildrenSkipCount(child, i);
-                 }
-                   
-          ```
+                            continue;
+                         }
 
+                         //根据showDivider的值(通过hasDividerBeforeChildAt()) 来决定当前子View
+                      	//是否需要添加drvider的高度
+                         if (hasDividerBeforeChildAt(i)) {
+                             mTotalLength += mDividerHeight;
+                         }
+                         //父容器在add,measure时会将子View的LayoutParams 强转为自己的类型
+                         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) child.getLayoutParams();
 
+                         //权重
+                         totalWeight += lp.weight;
+                         
+             			//weight 相关分支
+                         
+                         //当LinearLayout是EXACLY模式或有具体的值) 子View的高度为0 weight大于0
+                         //在LinearLayout高度有剩余的时候会根据权重分配高度(二次测量)
+                         if (heightMode == MeasureSpec.EXACTLY && lp.height == 0 && lp.weight > 0) {
+                             final int totalLength = mTotalLength;
+                             mTotalLength = Math.max(totalLength, totalLength + lp.topMargin + lp.bottomMargin);
+                             skippedMeasure = true;
+                         } else {
+
+                             //其他情况
+                             int oldHeight = Integer.MIN_VALUE;
+
+                             if (lp.height == 0 && lp.weight > 0) {
+             					//相当于父类为为wrap_layout 或者为UNSPECIFIED模式
+                                 //将子VIew的高度设置为-1(WRAP_CONTCNT)
+             					//防止子空间高度为0
+                                 oldHeight = 0;
+                                 lp.height = LayoutParams.WRAP_CONTENT;
+                             }
+
+                             //开始测量子VIew
+                             //当LinearLayout不是EXACLY模式 且子VIew的weight大于0 会优先把LIinearLayout的全部可用高度用于子View的测量
+                           	//实际上调用ViewGroup中的getChildMeasureSpec()
+                           	//当之前的weight为0 进行正常测量 否则LinearLayout传入0
+                           	//结合父View的MeasureSpec子View的LayoutParams 对子View进行测量
+                           	//在测量View之前 如果weight为0 需要考虑之前分配的高度 根据剩余
+                             measureChildBeforeLayout(
+                                    child, i, widthMeasureSpec, 0, heightMeasureSpec,
+                                    totalWeight == 0 ? mTotalLength : 0);
+                            //重置子VIew高度 
+                                   if (oldHeight != Integer.MIN_VALUE) {
+                                      lp.height = oldHeight;
+                                   }
+
+                                   final int childHeight = child.getMeasuredHeight();
+                                   final int totalLength = mTotalLength;
+                                   
+                                   //getNextLocationOffset()返回0 
+                                  //比较child测量前后总高度 取较大值
+                                   mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
+                           
+                           if (useLargestChild) {
+                                       largestChildHeight = Math.max(childHeight, largestChildHeight);
+                                   }
+                               }
+                      if ((baselineChildIndex >= 0) && (baselineChildIndex == i + 1)) {
+                                  mBaselineChildTop = mTotalLength;
+                               }
+
+                               if (i < baselineChildIndex && lp.weight > 0) {
+                                   throw new RuntimeException("A child of LinearLayout with index " + "less than mBaselineAlignedChildIndex has weight > 0, which "
+             + "won't work.  Either remove the weight, or don't set "+ "mBaselineAlignedChildIndex.");
+                       }
+
+                       boolean matchWidthLocally = false;
+                    	//当父View非EXACTLY或精确值 子View为match_parent
+                    	//matchWidthLocally和matchWidth置为true
+                    	//该View或占据父View水平方向所有空间
+                       if (widthMode != MeasureSpec.EXACTLY && lp.width == LayoutParams.MATCH_PARENT) {
+                           matchWidth = true;
+                           matchWidthLocally = true;
+                       }
+
+                       final int margin = lp.leftMargin + lp.rightMargin;
+                       final int measuredWidth = child.getMeasuredWidth() + margin;
+                       maxWidth = Math.max(maxWidth, measuredWidth);
+                       childState = combineMeasuredStates(childState, child.getMeasuredState());
+
+                       allFillParent = allFillParent && lp.width == LayoutParams.MATCH_PARENT;
+                       if (lp.weight > 0) {
+                           weightedMaxWidth = Math.max(weightedMaxWidth,
+                                   matchWidthLocally ? margin : measuredWidth);
+                       } else {
+                           alternativeMaxWidth = Math.max(alternativeMaxWidth,
+                                   matchWidthLocally ? margin : measuredWidth);
+                       }
+
+                       i += getChildrenSkipCount(child, i);
+                    }
+             ```
+
+        *    other
+
+             - 根据LinearLayout模式分成两部分 EXACTLY模式下且weight不为0 且高度为0的子View优先级低 如果LinearLayout剩余空间不足则不显示 但是如果是AT_MOST的weight不为0 企鹅高度设置为0会优先获得高度
+             - 为LinearLayout动态添加子View的时候，子View的LayoutParams一定要是LinearLayout的内部类(ViewGroup通用)
 
 
 ​	
 
- 3. other
-
-    * 根据LinearLayout模式分成两部分 EXACTLY模式下且weight不为0 且高度为0的子View优先级低 如果LinearLayout剩余空间不足则不显示 但是如果是AT_MOST的weight不为0 企鹅高度设置为0会优先获得高度
-    * 为LinearLayout动态添加子View的时候，子View的LayoutParams一定要是LinearLayout的内部类(ViewGroup通用)
+ 3. ​
 
 
 
