@@ -1,7 +1,7 @@
 ## RelativeLayout  源码分析
 > 继承自ViewGroup 没有重载onDraw方法 内部子View又是相对 只要计算出View的坐标 layout过程同样简单
- 
-    
+
+```java
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         //  The layout has actually already been performed and the positions
         //  cached.  Apply the cached values to the children.
@@ -16,8 +16,9 @@
             }
         }
     }
-    
-    
+```
+
+
 ### RealtiveLayout的measure过程
 #### 主要过程
 1. 将内部View根据纵向关系和横向关系排序
@@ -29,16 +30,38 @@
 
 #### 1 将内部View根据纵向关系和横向关系排序
 >layout_toRightOf 为横向关系  layout_below为纵向关系
- 
+
+ ```java
     //首先会根据mDirtyHierarchy的值判断是否需要将子View重新排序
     if (mDirtyHierarchy) {
         mDirtyHierarchy = false;
         sortChildren();
     }
-    //mDirtyHierarchy的值只有在requestLayout方法下被更新 
+    //mDirtyHierarchy的值只有在requestLayout方法下被更新
     public void requestLayout() {
         super.requestLayout();
         mDirtyHierarchy = true;
     }
-    
-    //
+
+    //sortChildren()方法对横向纵向关系的view的数组进行非空判断 用DependencyGraph进行判断
+    private void sortChildren() {
+        final int count = getChildCount();
+        if (mSortedVerticalChildren == null || mSortedVerticalChildren.length != count) {
+            mSortedVerticalChildren = new View[count];
+        }
+
+        if (mSortedHorizontalChildren == null || mSortedHorizontalChildren.length != count) {
+            mSortedHorizontalChildren = new View[count];
+        }
+
+        final DependencyGraph graph = mGraph;
+        graph.clear();
+
+        for (int i = 0; i < count; i++) {
+            graph.add(getChildAt(i));
+        }
+
+        graph.getSortedViews(mSortedVerticalChildren, RULES_VERTICAL);
+        graph.getSortedViews(mSortedHorizontalChildren, RULES_HORIZONTAL);
+    }
+```
