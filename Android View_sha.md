@@ -500,4 +500,103 @@ private void measureChildHorizontal(View child, LayoutParams params, int myWidth
 以上 完成了View的第一次测量  确定了View的大小 然后根据大小觉得把子view放在父RelativeLayout中的位置
 
 ```java
+private boolean positionChildHorizontal(View child, LayoutParams params, int myWidth,
+        boolean wrapContent) {
+    //获取RelativeLayout的布局方向
+    final int layoutDirection = getLayoutDirection();
+    int[] rules = params.getRules(layoutDirection);
+
+    if (params.mLeft == VALUE_NOT_SET && params.mRight != VALUE_NOT_SET) {
+        // 如果右边界有效 左边界无效 根据右边界计算出左边界
+        params.mLeft = params.mRight - child.getMeasuredWidth();
+    } else if (params.mLeft != VALUE_NOT_SET && params.mRight == VALUE_NOT_SET) {
+        // 同上反之
+        params.mRight = params.mLeft + child.getMeasuredWidth();
+    } else if (params.mLeft == VALUE_NOT_SET && params.mRight == VALUE_NOT_SET) {
+        //都无效的时候
+
+        if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_HORIZONTAL] != 0) {
+          //设置了CENTER_IN_PARENT或者 CENTER_HORIZONTAL的情况下
+            if (!wrapContent) {
+              //非wrap情况下
+              //把子View水平中心固定在RelativeLayout的中心
+                centerHorizontal(child, params, myWidth);
+            } else {
+               //左边距为padding+margin
+               //右边距为左边距加上测量宽度
+                params.mLeft = mPaddingLeft + params.leftMargin;
+                params.mRight = params.mLeft + child.getMeasuredWidth();
+            }
+            return true;
+        } else {
+            //RTL右到左 布局方向
+            //LTR左到右 布局方向
+            if (isLayoutRtl()) {
+                params.mRight = myWidth - mPaddingRight- params.rightMargin;
+                params.mLeft = params.mRight - child.getMeasuredWidth();
+            } else {
+                params.mLeft = mPaddingLeft + params.leftMargin;
+                params.mRight = params.mLeft + child.getMeasuredWidth();
+            }
+        }
+    }
+    return rules[ALIGN_PARENT_END] != 0;
+    //当为CENTER_IN_PARENT  CENTER_HORIZONTAL ALIGN_PARENT_END三种情况之一时返回True
+}
+```
+
+#### 4 遍历竖直关系的View
+```java
+...
+  for (int i = 0; i < count; i++) {
+           final View child = views[i];
+           if (child.getVisibility() != GONE) {
+               final LayoutParams params = (LayoutParams) child.getLayoutParams();
+              //将竖直方向规则转换为坐标
+               applyVerticalSizeRules(params, myHeight, child.getBaseline());
+               //测量子View
+               measureChild(child, params, myWidth, myHeight);
+               //确定竖直方向子View的位置
+               if (positionChildVertical(child, params, myHeight, isWrapContentHeight)) {
+                   offsetVerticalAxis = true;
+               }
+              //首先判断是否为wrap模式
+               if (isWrapContentWidth) {
+                 //根据RTL或者LTR和版本进行区分
+                 //Build.VERSION_CODES.KITKAT = 19
+                 //主要对margin进行处理
+                   if (isLayoutRtl()) {
+                       if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
+                           width = Math.max(width, myWidth - params.mLeft);
+                       } else {
+                           width = Math.max(width, myWidth - params.mLeft - params.leftMargin);
+                       }
+                   } else {
+                       if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
+                           width = Math.max(width, params.mRight);
+                       } else {
+                           width = Math.max(width, params.mRight + params.rightMargin);
+                       }
+                   }
+               }
+               if (isWrapContentHeight) {
+                   if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
+                       height = Math.max(height, params.mBottom);
+                   } else {
+                       height = Math.max(height, params.mBottom + params.bottomMargin);
+                   }
+               }
+
+               if (child != ignore || verticalGravity) {
+                   left = Math.min(left, params.mLeft - params.leftMargin);
+                   top = Math.min(top, params.mTop - params.topMargin);
+               }
+
+               if (child != ignore || horizontalGravity) {
+                   right = Math.max(right, params.mRight + params.rightMargin);
+                   bottom = Math.max(bottom, params.mBottom + params.bottomMargin);
+               }
+           }
+       }
+...
 ```
