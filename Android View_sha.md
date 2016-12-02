@@ -385,7 +385,8 @@ private void measureChildHorizontal(View child, LayoutParams params, int myWidth
         }
         childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, heightMode);
     }
-
+    //获得了子View的WidthMeasureSpec和HeightMeasureSpec
+    //子View可以通过measure方法获取自身的size
     child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 }
 ```
@@ -461,8 +462,10 @@ private void measureChildHorizontal(View child, LayoutParams params, int myWidth
            childSpecMode = isUnspecified ? MeasureSpec.UNSPECIFIED : MeasureSpec.EXACTLY;
            childSpecSize = Math.max(0, maxAvailable);
        } else {
+          //反之 判断childSize的相关值
            if (childSize >= 0) {
-               // Child wanted an exact size. Give as much as possible.
+               //设置模式为EXACTLY
+               //判断maxAvailable和childSize情况 取较大值设置为childSpecSize
                childSpecMode = MeasureSpec.EXACTLY;
 
                if (maxAvailable >= 0) {
@@ -473,13 +476,11 @@ private void measureChildHorizontal(View child, LayoutParams params, int myWidth
                    childSpecSize = childSize;
                }
            } else if (childSize == LayoutParams.MATCH_PARENT) {
-               // Child wanted to be as big as possible. Give all available
-               // space.
+               //如果子View是match模式 参照isUnspecified设置相关
                childSpecMode = isUnspecified ? MeasureSpec.UNSPECIFIED : MeasureSpec.EXACTLY;
                childSpecSize = Math.max(0, maxAvailable);
            } else if (childSize == LayoutParams.WRAP_CONTENT) {
-               // Child wants to wrap content. Use AT_MOST to communicate
-               // available space if we know our max size.
+               //在wrap进行设置
                if (maxAvailable >= 0) {
                    // We have a maximum size in this dimension.
                    childSpecMode = MeasureSpec.AT_MOST;
@@ -495,4 +496,8 @@ private void measureChildHorizontal(View child, LayoutParams params, int myWidth
 
        return MeasureSpec.makeMeasureSpec(childSpecSize, childSpecMode);
    }
+```
+以上 完成了View的第一次测量  确定了View的大小 然后根据大小觉得把子view放在父RelativeLayout中的位置
+
+```java
 ```
