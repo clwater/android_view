@@ -37,6 +37,9 @@
         mDirtyHierarchy = false;
         sortChildren();
     }
+```
+相关调用方法
+```java
     //mDirtyHierarchy的值只有在requestLayout方法下被更新
     public void requestLayout() {
         super.requestLayout();
@@ -136,4 +139,211 @@
   ...
 }
 ```
-eg: A依赖B B依赖C 首先存入C 因为不依赖任何其它的 
+eg: A依赖B B依赖C 首先存入C 因为不依赖任何其它的
+
+```java
+
+        /**
+         * Finds the roots of the graph. A root is a node with no dependency and
+         * with [0..n] dependents.
+         *
+         * @param rulesFilter The list of rules to consider when building the
+         *        dependencies
+         *
+         * @return A list of node, each being a root of the graph
+         */
+        private ArrayDeque<Node> findRoots(int[] rulesFilter) {
+          //keyNodes为nodelist
+            final SparseArray<Node> keyNodes = mKeyNodes;
+            final ArrayList<Node> nodes = mNodes;
+            final int count = nodes.size();
+
+          //初始化依赖该node的node和该node依赖的node相关参数
+            for (int i = 0; i < count; i++) {
+                final Node node = nodes.get(i);
+                node.dependents.clear();
+                node.dependencies.clear();
+            }
+
+
+            //遍历所有node  存入当前view和他所依赖的关系
+            for (int i = 0; i < count; i++) {
+                final Node node = nodes.get(i);
+
+                final LayoutParams layoutParams = (LayoutParams) node.view.getLayoutParams();
+                //取出当前View所有的依赖关系
+                final int[] rules = layoutParams.mRules;
+                final int rulesCount = rulesFilter.length;
+
+                //遍历当前View所有的
+                for (int j = 0; j < rulesCount; j++) {
+                  //rule对应被依赖view的id
+                    final int rule = rules[rulesFilter[j]];
+                    if (rule > 0) {
+                        //找到被依赖的node
+                        final Node dependency = keyNodes.get(rule);
+                        //跳过空view和本身
+                        if (dependency == null || dependency == node) {
+                            continue;
+                        }
+                        //添加依赖被依赖的node
+                        dependency.dependents.put(node, this);
+                        node.dependencies.put(rule, dependency);
+                    }
+                }
+            }
+
+            final ArrayDeque<Node> roots = mRoots;
+            roots.clear();
+
+            // 再次遍历  如果该node的依赖关系为0 即该view不依赖任何view 则视为rootView
+            for (int i = 0; i < count; i++) {
+                final Node node = nodes.get(i);
+                if (node.dependencies.size() == 0) roots.addLast(node);
+            }
+
+            return roots;
+        }
+```
+
+#### 2 初始化相关变量
+```java
+  int myWidth = -1;
+  int myHeight = -1;
+
+  int width = 0;
+  int height = 0;
+
+  final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+  final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+  final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+  final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+  // 如果不是UNSPECIFIED模式 则将widthSize赋值于myWidth
+  if (widthMode != MeasureSpec.UNSPECIFIED) {
+      myWidth = widthSize;
+  }
+  // 如果不是UNSPECIFIED模式 则将heightSize赋值于myHeight
+  if (heightMode != MeasureSpec.UNSPECIFIED) {
+      myHeight = heightSize;
+  }
+  //如果是EXACTLY模式 则将myWidth和myHeight记录
+  if (widthMode == MeasureSpec.EXACTLY) {
+      width = myWidth;
+  }
+
+  if (heightMode == MeasureSpec.EXACTLY) {
+      height = myHeight;
+  }
+
+  View ignore = null;
+  //判断是否为Start 和  top 确定左上角坐标
+  int gravity = mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
+  final boolean horizontalGravity = gravity != Gravity.START && gravity != 0;
+  gravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
+  final boolean verticalGravity = gravity != Gravity.TOP && gravity != 0;
+
+  int left = Integer.MAX_VALUE;
+  int top = Integer.MAX_VALUE;
+  int right = Integer.MIN_VALUE;
+  int bottom = Integer.MIN_VALUE;
+
+  boolean offsetHorizontalAxis = false;
+  boolean offsetVerticalAxis = false;
+  // 记录ignore的view
+  if ((horizontalGravity || verticalGravity) && mIgnoreGravity != View.NO_ID) {
+      ignore = findViewById(mIgnoreGravity);
+  }
+  //宽度个高度是否为warp模式
+  final boolean isWrapContentWidth = widthMode != MeasureSpec.EXACTLY;
+  final boolean isWrapContentHeight = heightMode != MeasureSpec.EXACTLY;
+
+  //在计算和分配的子View的坐标的时候 需要用到父VIew的尺寸 但是暂时无法拿到准确值(待完成下面操作)
+  //先使用默认值代替 在计算后 用偏移量更新真是坐标
+  final int layoutDirection = getLayoutDirection();
+  if (isLayoutRtl() && myWidth == -1) {
+      myWidth = DEFAULT_WIDTH;
+  }
+```
+
+#### 3  遍历水平关系的View
+```java
+    View[] views = mSortedHorizontalChildren;
+    int count = views.length;
+
+    for (int i = 0; i < count; i++) {
+        View child = views[i];
+        if (child.getVisibility() != GONE) {
+            LayoutParams params = (LayoutParams) child.getLayoutParams();
+            //根据方向获得子View中设置的规则
+            int[] rules = params.getRules(layoutDirection);
+            //将左右方向规则转换为左右的坐标
+            applyHorizontalSizeRules(params, myWidth, rules);
+            //测算水平方向的子View的尺寸
+            measureChildHorizontal(child, params, myWidth, myHeight);
+            //确定水平方向子View的位置
+            if (positionChildHorizontal(child, params, myWidth, isWrapContentWidth)) {
+                offsetHorizontalAxis = true;
+            }
+        }
+    }
+
+```
+相关方法
+```java
+    private void applyHorizontalSizeRules(LayoutParams childParams, int myWidth, int[] rules) {
+        RelativeLayout.LayoutParams anchorParams;
+        childParams.mLeft = VALUE_NOT_SET;
+        childParams.mRight = VALUE_NOT_SET;
+        //得到当前子View的layout_toLeftOf属性对应的View
+        anchorParams = getRelatedViewParams(rules, LEFT_OF);
+        if (anchorParams != null) {
+          //如果这个属性存在 则当前子View的右坐标是layout_toLeftOf对应的view的左坐标减去对应view的marginLeft的值和自身marginRight的值
+            childParams.mRight = anchorParams.mLeft - (anchorParams.leftMargin +
+                    childParams.rightMargin);
+        //如果alignWithParent为true alignWithParent取alignWithParentIfMissing
+        //如果layout_toLeftOf的view为空 或者gone 则将RelativeLayout当做被依赖的对象
+        } else if (childParams.alignWithParent && rules[LEFT_OF] != 0) {
+            //如果父容器RelativeLayout的宽度大于0
+            //则子View的右坐标为 父RelativeLayout的宽度减去 mPaddingRight 和自身的marginRight
+            if (myWidth >= 0) {
+                childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
+            }
+        }
+
+        //类似的方法 得到左坐标(通过参数RIGHT_OF)
+        anchorParams = getRelatedViewParams(rules, RIGHT_OF);
+        if (anchorParams != null) {
+            childParams.mLeft = anchorParams.mRight + (anchorParams.rightMargin +
+                    childParams.leftMargin);
+        } else if (childParams.alignWithParent && rules[RIGHT_OF] != 0) {
+            childParams.mLeft = mPaddingLeft + childParams.leftMargin;
+        }
+        //类似的方法 得到左坐标 (通过参数ALIGN_LEFT)
+        anchorParams = getRelatedViewParams(rules, ALIGN_LEFT);
+        if (anchorParams != null) {
+            childParams.mLeft = anchorParams.mLeft + childParams.leftMargin;
+        } else if (childParams.alignWithParent && rules[ALIGN_LEFT] != 0) {
+            childParams.mLeft = mPaddingLeft + childParams.leftMargin;
+        }
+        //类似的方法 得到右坐标 (通过参数ALIGN_RIGHT)
+        anchorParams = getRelatedViewParams(rules, ALIGN_RIGHT);
+        if (anchorParams != null) {
+            childParams.mRight = anchorParams.mRight - childParams.rightMargin;
+        } else if (childParams.alignWithParent && rules[ALIGN_RIGHT] != 0) {
+            if (myWidth >= 0) {
+                childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
+            }
+        }
+
+        if (0 != rules[ALIGN_PARENT_LEFT]) {
+            childParams.mLeft = mPaddingLeft + childParams.leftMargin;
+        }
+
+        if (0 != rules[ALIGN_PARENT_RIGHT]) {
+            if (myWidth >= 0) {
+                childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
+            }
+        }
+    }
+```
