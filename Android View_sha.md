@@ -335,15 +335,164 @@ eg: A依赖B B依赖C 首先存入C 因为不依赖任何其它的
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
             }
         }
-
+        //根据ALIGN_PARENT_LEFT 将自己放到父RelativeLayout的左边
         if (0 != rules[ALIGN_PARENT_LEFT]) {
             childParams.mLeft = mPaddingLeft + childParams.leftMargin;
         }
-
+        //根据ALIGN_PARENT_RIGHT 将自己放到父RelativeLayout的右边
         if (0 != rules[ALIGN_PARENT_RIGHT]) {
             if (myWidth >= 0) {
                 childParams.mRight = myWidth - mPaddingRight - childParams.rightMargin;
             }
         }
     }
+```
+```java
+private void measureChildHorizontal(View child, LayoutParams params, int myWidth, int myHeight) {
+  //获得child的宽度MeasureSpec
+    final int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft, params.mRight,
+            params.width, params.leftMargin, params.rightMargin, mPaddingLeft, mPaddingRight,
+            myWidth);
+
+    final int childHeightMeasureSpec;
+    //在低于4.2的时候 mAllowBrokenMeasureSpecs为true
+    //当myHeight < 0 时 则根据父RelativeLayout设置其MeasureSpec模式
+    if (myHeight < 0 && !mAllowBrokenMeasureSpecs) {
+        //如果父RelativeLayout的height大于0  则 设置子view的MeasureSpec模式为EXACTLY
+        if (params.height >= 0) {
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                    params.height, MeasureSpec.EXACTLY);
+        } else {
+            //反之 如果其小于0  则设置子View的MeasureSpec为UNSPECIFIED
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        }
+    } else {
+      //当当前myHeight >= 0
+      //判断当前高度是否与父RelativeLayout高度相同 设置heightMode
+      //根据maxHeight 和heightMode设置子View的MeasureSpec模式
+        final int maxHeight;
+        if (mMeasureVerticalWithPaddingMargin) {
+            maxHeight = Math.max(0, myHeight - mPaddingTop - mPaddingBottom
+                    - params.topMargin - params.bottomMargin);
+        } else {
+            maxHeight = Math.max(0, myHeight);
+        }
+        final int heightMode;
+        if (params.height == LayoutParams.MATCH_PARENT) {
+            heightMode = MeasureSpec.EXACTLY;
+        } else {
+            heightMode = MeasureSpec.AT_MOST;
+        }
+        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, heightMode);
+    }
+
+    child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+}
+```
+```java
+/**
+    * Get a measure spec that accounts for all of the constraints on this view.
+    * This includes size constraints imposed by the RelativeLayout as well as
+    * the View's desired dimension.
+    *
+    * @param childStart The left or top field of the child's layout params
+    * @param childEnd The right or bottom field of the child's layout params
+    * @param childSize The child's desired size (the width or height field of
+    *        the child's layout params)
+    * @param startMargin The left or top margin
+    * @param endMargin The right or bottom margin
+    * @param startPadding mPaddingLeft or mPaddingTop
+    * @param endPadding mPaddingRight or mPaddingBottom
+    * @param mySize The width or height of this view (the RelativeLayout)
+    * @return MeasureSpec for the child
+    */
+   private int getChildMeasureSpec(int childStart, int childEnd,
+           int childSize, int startMargin, int endMargin, int startPadding,
+           int endPadding, int mySize) {
+       int childSpecMode = 0;
+       int childSpecSize = 0;
+
+       final boolean isUnspecified = mySize < 0;
+       //如果父RelativeLayout宽度小于0 版本号不小于4.2
+       if (isUnspecified && !mAllowBrokenMeasureSpecs) {
+            //如果子View的左边距和右边距都不为VALUE_NOT_SET
+            //且右边距坐标大于左边距坐标 则将其差当做宽度赋予View 设置模式为EXACTLY
+            //VALUE_NOT_SET = Integer.MIN_VALUE
+            /**
+             * Constant for the minimum {@code int} value, -2<sup>31</sup>.
+             */
+            //public static final int MIN_VALUE = 0x80000000;
+           if (childStart != VALUE_NOT_SET && childEnd != VALUE_NOT_SET) {
+               childSpecSize = Math.max(0, childEnd - childStart);
+               childSpecMode = MeasureSpec.EXACTLY;
+           } else if (childSize >= 0) {
+               // 如果childSpecSize >= 0 则赋值于childSpecSize
+               //同样设置模式为EXACTLY
+               childSpecSize = childSize;
+               childSpecMode = MeasureSpec.EXACTLY;
+           } else {
+               // 都不满足则设置模式为UNSPECIFIED
+               childSpecSize = 0;
+               childSpecMode = MeasureSpec.UNSPECIFIED;
+           }
+
+           return MeasureSpec.makeMeasureSpec(childSpecSize, childSpecMode);
+       }
+
+       // 计算 开始和结束相关
+       int tempStart = childStart;
+       int tempEnd = childEnd;
+
+       //如果没有指定start值 则默认赋予 padding和merage的值
+       if (tempStart == VALUE_NOT_SET) {
+           tempStart = startPadding + startMargin;
+       }
+       //同上
+       if (tempEnd == VALUE_NOT_SET) {
+           tempEnd = mySize - endPadding - endMargin;
+       }
+
+       //指定最大可提供的大小
+       final int maxAvailable = tempEnd - tempStart;
+
+       if (childStart != VALUE_NOT_SET && childEnd != VALUE_NOT_SET) {
+           //如果Start和End都是有效值 根据isUnspecified设置specMode为UNSPECIFIED或EXACTLY
+           //并将设置对应的size
+           childSpecMode = isUnspecified ? MeasureSpec.UNSPECIFIED : MeasureSpec.EXACTLY;
+           childSpecSize = Math.max(0, maxAvailable);
+       } else {
+           if (childSize >= 0) {
+               // Child wanted an exact size. Give as much as possible.
+               childSpecMode = MeasureSpec.EXACTLY;
+
+               if (maxAvailable >= 0) {
+                   // We have a maximum size in this dimension.
+                   childSpecSize = Math.min(maxAvailable, childSize);
+               } else {
+                   // We can grow in this dimension.
+                   childSpecSize = childSize;
+               }
+           } else if (childSize == LayoutParams.MATCH_PARENT) {
+               // Child wanted to be as big as possible. Give all available
+               // space.
+               childSpecMode = isUnspecified ? MeasureSpec.UNSPECIFIED : MeasureSpec.EXACTLY;
+               childSpecSize = Math.max(0, maxAvailable);
+           } else if (childSize == LayoutParams.WRAP_CONTENT) {
+               // Child wants to wrap content. Use AT_MOST to communicate
+               // available space if we know our max size.
+               if (maxAvailable >= 0) {
+                   // We have a maximum size in this dimension.
+                   childSpecMode = MeasureSpec.AT_MOST;
+                   childSpecSize = maxAvailable;
+               } else {
+                   // We can grow in this dimension. Child can be as big as it
+                   // wants.
+                   childSpecMode = MeasureSpec.UNSPECIFIED;
+                   childSpecSize = 0;
+               }
+           }
+       }
+
+       return MeasureSpec.makeMeasureSpec(childSpecSize, childSpecMode);
+   }
 ```
