@@ -600,3 +600,130 @@ private boolean positionChildHorizontal(View child, LayoutParams params, int myW
        }
 ...
 ```
+
+#### 5 baseline计算
+```java
+// Use the top-start-most laid out view as the baseline. RTL offsets are
+// applied later, so we can use the left-most edge as the starting edge.
+    View baselineView = null;
+    LayoutParams baselineParams = null;
+    for (int i = 0; i < count; i++) {
+        final View child = views[i];
+        if (child.getVisibility() != GONE) {
+            final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
+            if (baselineView == null || baselineParams == null
+                    || compareLayoutPosition(childParams, baselineParams) < 0) {
+                baselineView = child;
+                baselineParams = childParams;
+            }
+        }
+    }
+    mBaselineView = baselineView;
+```
+
+#### 6 宽度和高度修正
+```java
+    //如何是wrap模式
+    if (isWrapContentWidth) {
+            width += mPaddingRight;
+
+            if (mLayoutParams != null && mLayoutParams.width >= 0) {
+                width = Math.max(width, mLayoutParams.width);
+            }
+
+            width = Math.max(width, getSuggestedMinimumWidth());
+            width = resolveSize(width, widthMeasureSpec);
+
+            //在得到最后的width之后 对依赖RelativeLayout的子View添上偏移量
+            if (offsetHorizontalAxis) {
+                for (int i = 0; i < count; i++) {
+                    final View child = views[i];
+                    if (child.getVisibility() != GONE) {
+                        final LayoutParams params = (LayoutParams) child.getLayoutParams();
+                        final int[] rules = params.getRules(layoutDirection);
+                        //对CENTER_IN_PARENT或者CENTER_HORIZONTAL的子View重测
+                        if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_HORIZONTAL] != 0) {
+                            centerHorizontal(child, params, width);
+                        //对ALIGN_PARENT_RIGHT重测
+                        } else if (rules[ALIGN_PARENT_RIGHT] != 0) {
+                            final int childWidth = child.getMeasuredWidth();
+                            params.mLeft = width - mPaddingRight - childWidth;
+                            params.mRight = params.mLeft + childWidth;
+                        }
+                    }
+                }
+            }
+        }
+        //同上
+        if (isWrapContentHeight) {
+            height += mPaddingBottom;
+
+            if (mLayoutParams != null && mLayoutParams.height >= 0) {
+                height = Math.max(height, mLayoutParams.height);
+            }
+
+            height = Math.max(height, getSuggestedMinimumHeight());
+            height = resolveSize(height, heightMeasureSpec);
+
+            if (offsetVerticalAxis) {
+                for (int i = 0; i < count; i++) {
+                    final View child = views[i];
+                    if (child.getVisibility() != GONE) {
+                        final LayoutParams params = (LayoutParams) child.getLayoutParams();
+                        final int[] rules = params.getRules(layoutDirection);
+                        if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_VERTICAL] != 0) {
+                            centerVertical(child, params, height);
+                        } else if (rules[ALIGN_PARENT_BOTTOM] != 0) {
+                            final int childHeight = child.getMeasuredHeight();
+                            params.mTop = height - mPaddingBottom - childHeight;
+                            params.mBottom = params.mTop + childHeight;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        //根据gravity再次修正
+        if (horizontalGravity || verticalGravity) {
+            final Rect selfBounds = mSelfBounds;
+            selfBounds.set(mPaddingLeft, mPaddingTop, width - mPaddingRight,
+                    height - mPaddingBottom);
+
+            final Rect contentBounds = mContentBounds;
+            Gravity.apply(mGravity, right - left, bottom - top, selfBounds, contentBounds,
+                    layoutDirection);
+
+            final int horizontalOffset = contentBounds.left - left;
+            final int verticalOffset = contentBounds.top - top;
+            if (horizontalOffset != 0 || verticalOffset != 0) {
+                for (int i = 0; i < count; i++) {
+                    final View child = views[i];
+                    if (child.getVisibility() != GONE && child != ignore) {
+                        final LayoutParams params = (LayoutParams) child.getLayoutParams();
+                        if (horizontalGravity) {
+                            params.mLeft += horizontalOffset;
+                            params.mRight += horizontalOffset;
+                        }
+                        if (verticalGravity) {
+                            params.mTop += verticalOffset;
+                            params.mBottom += verticalOffset;
+                        }
+                    }
+                }
+            }
+        }
+
+        //如果是RTL(右到左显示)则再次修改
+        if (isLayoutRtl()) {
+            final int offsetWidth = myWidth - width;
+            for (int i = 0; i < count; i++) {
+                final View child = views[i];
+                if (child.getVisibility() != GONE) {
+                    final LayoutParams params = (LayoutParams) child.getLayoutParams();
+                    params.mLeft -= offsetWidth;
+                    params.mRight -= offsetWidth;
+                }
+            }
+        }
+```
