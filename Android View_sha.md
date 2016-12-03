@@ -1,25 +1,7 @@
 ## RelativeLayout  源码分析
 > 继承自ViewGroup 没有重载onDraw方法 内部子View又是相对 只要计算出View的坐标 layout过程同样简单
 
-```java
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        //  The layout has actually already been performed and the positions
-        //  cached.  Apply the cached values to the children.
-        final int count = getChildCount();
-
-        for (int i = 0; i < count; i++) {
-            View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
-                RelativeLayout.LayoutParams st =
-                        (RelativeLayout.LayoutParams) child.getLayoutParams();
-                child.layout(st.mLeft, st.mTop, st.mRight, st.mBottom);
-            }
-        }
-    }
-```
-
-
-### RealtiveLayout的measure过程
+### RelativeLayout的measure过程
 #### 主要过程
 1. 将内部View根据纵向关系和横向关系排序
 2. 初始化相关变量
@@ -727,3 +709,30 @@ private boolean positionChildHorizontal(View child, LayoutParams params, int myW
             }
         }
 ```
+#### 简单总结
+RelativeLayout更加关注子View的left right top bottom值 并且优先级高于width和height 
+
+
+
+### RelativeLayout的layout过程
+```java
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        //  The layout has actually already been performed and the positions
+        //  cached.  Apply the cached values to the children.
+        final int count = getChildCount();
+
+        for (int i = 0; i < count; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != GONE) {
+                RelativeLayout.LayoutParams st =
+                        (RelativeLayout.LayoutParams) child.getLayoutParams();
+                child.layout(st.mLeft, st.mTop, st.mRight, st.mBottom);
+            }
+        }
+    }
+```
+
+### RelativeLayout的draw过程
+RelativeLayout作为ViewGroup的子类 因为其性质原因  没有对draw过程进行修改
+
+以上
