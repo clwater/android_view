@@ -4,7 +4,7 @@
 
 ##  View的测量、布局、绘制过程  
 
-0. 开始于ViewRootImpl 
+0. 开始于ViewRootImpl
 
    * performTraversals()
 
@@ -35,7 +35,7 @@
 
      * MeasureSpec.EXACTLY //确定模式，父View希望子View的大小是确定的，由specSize决定；
      * MeasureSpec.AT_MOST //最多模式，父View希望子View的大小最多是specSize指定的值；
-     * MeasureSpec.UNSPECIFIED //未指定模式，父View完全依据子View的设计值来决定； 
+     * MeasureSpec.UNSPECIFIED //未指定模式，父View完全依据子View的设计值来决定；
 
    * getSuggestedMinimumWidth/getSuggestedMinimumHeight
 
@@ -47,7 +47,7 @@
 
      * measureChildWithMargins
 
-       ```Ask one of the children of this view to measure itself, taking into account both the MeasureSpec requirements for this view and its padding and margins. ``` 
+       ```Ask one of the children of this view to measure itself, taking into account both the MeasureSpec requirements for this view and its padding and margins. ```
 
        对父视图提供的measureSpec参数结合自身的LayoutParams参数进行调整
 
@@ -145,7 +145,7 @@
 
       * onDraw(canvas); 调用onDraw方法绘制
 
-        * onDraw(canvas) 
+        * onDraw(canvas)
 
         ```Implement this to do your drawing```
 
@@ -163,7 +163,7 @@
 
       * View中dispatchDraw方法为空 ViewGroup中实现该方法
 
-      * 遍历ViewGroup中的子VIew通过调用drawChild()方法 调用子View draw()方法 
+      * 遍历ViewGroup中的子VIew通过调用drawChild()方法 调用子View draw()方法
 
 5.    draw the fade effect and restore layers
 
@@ -226,7 +226,7 @@
 
    Activity调运完ActivityThread的main(实际上Activity的开始)方法后 , 调用ActivityThread类的performLaunchActivity来创建要启动的Activity组件 ,这个过程中为该Activity组件创建窗口对象和视图对象 ,调运ActivityThread类的handleResumeActivity将它激活
 
-   ​	handleResumeActivity中 r.activity.makeVisible()  -> Activity - mDector.setVisibility(View.VISIBLE) 
+   ​	handleResumeActivity中 r.activity.makeVisible()  -> Activity - mDector.setVisibility(View.VISIBLE)
 
 ### LayoutInflater 分析
 
@@ -234,7 +234,7 @@
 
       封装 ContextThemeWrapper - getSystemService() 来获取实例化
 
-2.   LayoutInflater.inflate()们 
+2.   LayoutInflater.inflate()们
 
       ```Inflate a new view hierarchy from the specified xml resource```
 
@@ -266,16 +266,16 @@
 
         ```Measures the children when the orientation of this LinearLayout is set to {@link #VERTICAL}.```
 
-        *    相关变量 
+        *    相关变量
 
              ```java
-                //记录内部使用的高度 不是LinearLayout的高度 =-= 
+                //记录内部使用的高度 不是LinearLayout的高度 =-=
                  mTotalLength = 0;
              	//所有子View中 宽度最大的值
                  int maxWidth = 0;
              	//子View的测量状态 (通过combineMeasuredStates 按位相或 合并)
                  int childState = 0;
-             	
+
              	//当matchWidthLocally参数为真时 跟当前子控件的左右margin和相比较取大值
              	//weight<=0的View最大值
                  int alternativeMaxWidth = 0;
@@ -292,7 +292,7 @@
              	//高度宽度模式
                  final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
                  final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-             	
+
              	//判断子View是否为match_parent matchWidthLocally 觉得了子View 的测量时父View干预		//还是填充父View
                  boolean matchWidth = false;
                  boolean skippedMeasure = false;
@@ -310,7 +310,7 @@
                          final View child = getVirtualChildAt(i);
 
                          if (child == null) {
-                           	//measureNullChild() 任何情况下均返回0 
+                           	//measureNullChild() 任何情况下均返回0
                              mTotalLength += measureNullChild(i);
                              continue;
                          }
@@ -331,9 +331,9 @@
 
                          //权重
                          totalWeight += lp.weight;
-                         
+
              			//weight 相关分支
-                         
+
                          //当LinearLayout是EXACLY模式或有具体的值) 子View的高度为0 weight大于0
                          //在LinearLayout高度有剩余的时候会根据权重分配高度(二次测量)
                          if (heightMode == MeasureSpec.EXACTLY && lp.height == 0 && lp.weight > 0) {
@@ -362,18 +362,18 @@
                              measureChildBeforeLayout(
                                     child, i, widthMeasureSpec, 0, heightMeasureSpec,
                                     totalWeight == 0 ? mTotalLength : 0);
-                            //重置子VIew高度 
+                            //重置子VIew高度
                                    if (oldHeight != Integer.MIN_VALUE) {
                                       lp.height = oldHeight;
                                    }
 
                                    final int childHeight = child.getMeasuredHeight();
                                    final int totalLength = mTotalLength;
-                                   
-                                   //getNextLocationOffset()返回0 
+
+                                   //getNextLocationOffset()返回0
                                   //比较child测量前后总高度 取较大值
                                    mTotalLength = Math.max(totalLength, totalLength + childHeight + lp.topMargin + lp.bottomMargin + getNextLocationOffset(child));
-                           
+
                            if (useLargestChild) {
                                        largestChildHeight = Math.max(childHeight, largestChildHeight);
                                    }
@@ -456,30 +456,3 @@
                      int heightSizeAndState = resolveSizeAndState(heightSize, heightMeasureSpec, 0);
                      heightSize = heightSizeAndState & MEASURED_SIZE_MASK;
              ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

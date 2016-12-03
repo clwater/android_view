@@ -1,3 +1,96 @@
+#Android View
+>Android View框架相关  View的测量 布局 绘制过程
+LinearLayout RelativeLayout实现源码分析
+
+## 从setContentView与LayoutInflater加载解析机制说起
+### setContentView分析
+#### 相关关系
+
+  ![相关关系图](/image_1.png)
+
+  Activity中有Window成员 实例化为PhoneWindow PhoneWindow是抽象Window类的实现类
+
+  Window提供了绘制窗口的通用API PhoneWindow中包含了DecorView对象 是所有窗口(Activity界面)的根View
+
+#### PhoneWindow的setContentView分析
+>Activity的setContentView方法最终都是实现Window类的setContentView方法 而Window的setContentView方法是抽象的  所以查看PhoneWindow的setContentView()
+1. setContentView方法
+  ```java
+  // This is the view in which the window contents are placed. It is either
+  // mDecor itself, or a child of mDecor where the contents go.
+  private ViewGroup mContentParent;
+
+  @Override
+  public void setContentView(int layoutResID) {
+      // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
+      // decor, when theme attributes and the like are crystalized. Do not check the feature
+      // before this happens.
+      if (mContentParent == null) {
+          //第一次调用
+          installDecor();
+      } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+          //移除该mContentParent下的所有View
+          //又因为这个的存在  我们可以多次使用setContentView()
+          mContentParent.removeAllViews();
+      }
+      //判断是否使用了Activity的过度动画
+      if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+        //设置动画场景
+          final Scene newScene = Scene.getSceneForLayout(mContentParent, layoutResID,
+                  getContext());
+          transitionTo(newScene);
+      } else {
+          //将资源文件通过LayoutInflater对象装换为View树
+          //在PhoneWindow的构造函数中 mLayoutInflater = LayoutInflater.from(context);
+          mLayoutInflater.inflate(layoutResID, mContentParent);
+      }
+
+      //View中
+      /**
+       * Ask that a new dispatch of {@link #onApplyWindowInsets(WindowInsets)} be performed.
+       */
+      // public void requestApplyInsets() {
+      //     requestFitSystemWindows();
+      // }
+      mContentParent.requestApplyInsets();
+      final Callback cb = getCallback();
+      if (cb != null && !isDestroyed()) {
+          cb.onContentChanged();
+      }
+  }
+
+  @Override
+  public void setContentView(View view) {
+      setContentView(view, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+  }
+
+  @Override
+  public void setContentView(View view, ViewGroup.LayoutParams params) {
+      if (mContentParent == null) {
+          installDecor();
+      } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+          mContentParent.removeAllViews();
+      }
+
+      if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+          view.setLayoutParams(params);
+          final Scene newScene = new Scene(mContentParent, view);
+          transitionTo(newScene);
+      } else {
+        //已经为View 直接使用View的addView方法追加到当前mContentParent中
+          mContentParent.addView(view, params);
+      }
+      mContentParent.requestApplyInsets();
+      final Callback cb = getCallback();
+      if (cb != null && !isDestroyed()) {
+          cb.onContentChanged();
+      }
+  }
+  ```
+2.
+
+
+
 ## RelativeLayout  源码分析
 > 继承自ViewGroup 没有重载onDraw方法 内部子View又是相对 只要计算出View的坐标 layout过程同样简单
 
@@ -710,7 +803,7 @@ private boolean positionChildHorizontal(View child, LayoutParams params, int myW
         }
 ```
 #### 简单总结
-RelativeLayout更加关注子View的left right top bottom值 并且优先级高于width和height 
+RelativeLayout更加关注子View的left right top bottom值 并且优先级高于width和height
 
 
 
@@ -734,5 +827,6 @@ RelativeLayout更加关注子View的left right top bottom值 并且优先级高�
 
 ### RelativeLayout的draw过程
 RelativeLayout作为ViewGroup的子类 因为其性质原因  没有对draw过程进行修改
+
 
 以上
