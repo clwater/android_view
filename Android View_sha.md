@@ -6,7 +6,7 @@ LinearLayout RelativeLayout实现源码分析
 ### setContentView分析
 #### 相关关系
 
-  ![相关关系图](/image_1.png)
+  ![相关关系图](/image_1.png)  
 
   Activity中有Window成员 实例化为PhoneWindow PhoneWindow是抽象Window类的实现类
 
