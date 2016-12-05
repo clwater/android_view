@@ -13,7 +13,7 @@ LinearLayout RelativeLayout实现源码分析
   Window提供了绘制窗口的通用API PhoneWindow中包含了DecorView对象 是所有窗口(Activity界面)的根View
 
 #### PhoneWindow的setContentView分析
->Activity的setContentView方法最终都是实现Window类的setContentView方法 而Window的setContentView方法是抽象的  所以查看PhoneWindow的setContentView()
+>Window类的setContentView方法 而Window的setContentView方法是抽象的  所以查看PhoneWindow的setContentView()
 1. setContentView方法
   ```java
   // This is the view in which the window contents are placed. It is either
@@ -27,6 +27,7 @@ LinearLayout RelativeLayout实现源码分析
       // before this happens.
       if (mContentParent == null) {
           //第一次调用
+          //下面会详细分析
           installDecor();
       } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
           //移除该mContentParent下的所有View
@@ -87,8 +88,32 @@ LinearLayout RelativeLayout实现源码分析
       }
   }
   ```
-2.
+2.installDecor方法
+截取部分主要分析代码
+```java
+private void installDecor() {
+    if (mDecor == null) {
+        //如果mDecor为空则创建一个DecorView实例
+        // protected DecorView generateDecor() {
+        //   return new DecorView(getContext(), -1);
+        // }
+        mDecor = generateDecor();  
+        mDecor.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
+        mDecor.setIsRootNamespace(true);
+        if (!mInvalidatePanelMenuPosted && mInvalidatePanelMenuFeatures != 0) {
+            mDecor.postOnAnimation(mInvalidatePanelMenuRunnable);
+        }
+    }
+    if (mContentParent == null) {
+        //根据窗口的风格修饰 选择对应的修饰布局文件 将id为content的FrameLayout赋值于mContentParent
+        mContentParent = generateLayout(mDecor);
+        ...
+      }
+}
+```
+```java
 
+```
 
 
 ## RelativeLayout  源码分析
