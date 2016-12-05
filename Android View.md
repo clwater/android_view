@@ -227,6 +227,8 @@
    Activity调运完ActivityThread的main(实际上Activity的开始)方法后 , 调用ActivityThread类的performLaunchActivity来创建要启动的Activity组件 ,这个过程中为该Activity组件创建窗口对象和视图对象 ,调运ActivityThread类的handleResumeActivity将它激活
 
    ​	handleResumeActivity中 r.activity.makeVisible()  -> Activity - mDector.setVisibility(View.VISIBLE)
+```
+
 
 ### LayoutInflater 分析
 
@@ -236,15 +238,16 @@
 
 2.   LayoutInflater.inflate()们
 
-      ```Inflate a new view hierarchy from the specified xml resource```
+      Inflate a new view hierarchy from the specified xml resource
 
 3.   LayoutInflater.inflate() - rInflate()
 
-      ```Recursive method used to descend down the xml hierarchy and instantiate views, instantiate their children```
+    Recursive method used to descend down the xml hierarchy and instantiate views, instantiate their children
 
      parent的所有子节点都inflate完毕的时候回onFinishInflate方法 onFinishInflate()为空方法  可以添加自定义逻辑
 
-     ## LinearLayout
+
+## LinearLayout
 
 
      > View的measure方法为final 只能通过重载onMeasure实现组件自己的测量逻辑

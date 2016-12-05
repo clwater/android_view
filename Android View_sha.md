@@ -254,3 +254,26 @@ LinearLayout RelativeLayout实现源码分析
   至此通过setContentView方法设置的页面才最后显示出来
 
 ### LayoutInflater源码分析
+1. 与setContentView相关
+
+在PhoneWindow的generateLayout中调用了     
+```java
+  View in = mLayoutInflater.inflate(layoutResource, null);
+```
+
+2. LayoutInflater中获取实例化方法
+```java
+  /**
+   * Obtains the LayoutInflater from the given context.
+   */
+  public static LayoutInflater from(Context context) {
+      LayoutInflater LayoutInflater =
+              (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      if (LayoutInflater == null) {
+          throw new AssertionError("LayoutInflater not found.");
+      }
+      return LayoutInflater;
+  }
+```
+
+3. inflate方法相关
