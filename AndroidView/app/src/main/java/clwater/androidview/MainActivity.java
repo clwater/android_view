@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import clwater.androidview.view.TextButton;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnTouchListener {
+public class MainActivity extends AppCompatActivity{
 
     private LinearLayout linearLayout;
     private TextButton testbtn;
@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_main4);
 //
 //        linearLayout = (LinearLayout) findViewById(R.id.mylayout);
 //        testbtn = (TextButton) findViewById(R.id.test_mybtn);
@@ -36,24 +36,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         activity = this;
 
-        btn = (Button) findViewById(R.id.btn);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                activity.setContentView(R.layout.activity_main3);
-            }
-        });
+//        btn = (Button) findViewById(R.id.btn);
+//        btn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                activity.setContentView(R.layout.activity_main3);
+//            }
+//        });
     }
 
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        Log.i("view", "OnTouchListener--onTouch-- action="+event.getAction()+" --"+v);
-        return false;
-    }
-
-    @Override
-    public void onClick(View v) {
-        Log.i("view", "OnClickListener--onClick--"+v);
-    }
+//
+//    @Override
+//    public boolean onTouch(View v, MotionEvent event) {
+//        Log.i("view", "OnTouchListener--onTouch-- action="+event.getAction()+" --"+v);
+//        return false;
+//    }
+//
+//    @Override
+//    public void onClick(View v) {
+//        Log.i("view", "OnClickListener--onClick--"+v);
+//    }
 }
