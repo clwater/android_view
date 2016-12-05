@@ -12,10 +12,10 @@ LinearLayout RelativeLayout实现源码分析
 
   Window提供了绘制窗口的通用API PhoneWindow中包含了DecorView对象 是所有窗口(Activity界面)的根View
 
-  具体在手实现结构如下
+  具体的构如下
 
+  ![zn](/zn.png)
 
-  DecorView中有两个子View 一个子View是状态栏 两个是竖直布局的LinearLayout 其中又包含两个子View 其一是标题栏TitleView(ActionBar的容器) 另一个是ContentView ContentView是一个id为content的FrameLayout
   通过hierarchyviewer工具分析一下
 
 
