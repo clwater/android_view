@@ -8,17 +8,17 @@
 
    * performTraversals()
 
-     ```ache mView since it is used so much below…```
+     ache mView since it is used so much below…
 
      根据之前设置的状态 判断是否measure layout draw
 
    * getRootMeasureSpec()
 
-     ``` Figures out the measure spec for the root view in a window based on it's layout params.```
+      Figures out the measure spec for the root view in a window based on it's layout params.
 
 1. measure操作 用于确定视图宽度和长度
 
-   ```This is called to find out how big a view should be. The parent supplies constraint information in the width and height parameters.```
+   This is called to find out how big a view should be. The parent supplies constraint information in the width and height parameters.
 
    * 根据父视图和自身决定宽和高
 
@@ -29,7 +29,7 @@
 
 *  onMesure() - getDefaultSize()
 
-          ```Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.```
+          Utility to return a default size. Uses the supplied size if the   MeasureSpec imposed no constraints.Will get larger if allowed  by the MeasureSpec.
 
    * MeasureSpec（View的内部类）测量规格为int型，值由高2位规格模式specMode和低30位具体尺寸specSize组成
 
@@ -47,7 +47,7 @@
 
      * measureChildWithMargins
 
-       ```Ask one of the children of this view to measure itself, taking into account both the MeasureSpec requirements for this view and its padding and margins. ```
+       Ask one of the children of this view to measure itself, taking into account both the MeasureSpec requirements for this view and its padding and margins.
 
        对父视图提供的measureSpec参数结合自身的LayoutParams参数进行调整
 
@@ -56,7 +56,7 @@
 
      * MeasureSpec
 
-       ```A MeasureSpec encapsulates the layout requirements passed from parent to child.```
+       A MeasureSpec encapsulates the layout requirements passed from parent to child.
 
      * measure为final 只能通过重载onMeasure自定义测量逻辑
 
@@ -70,7 +70,7 @@
 
 2. layout操作 用于确定视图在屏幕中显示的位置
 
-   ```Assign a size and position to a view and all of its descendants This is the second phase of the layout mechanism.```
+   Assign a size and position to a view and all of its descendants This is the second phase of the layout mechanism.
 
    0. mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
@@ -98,11 +98,11 @@
 
 3.   draw操作 将视图显示到屏幕中
 
-     ``` Manually render this view (and all of its children) to the given Canvas.```
+      Manually render this view (and all of its children) to the given Canvas.
 
      draw
 
-     ```java
+     java
      	 /*
      * Draw traversal performs several drawing steps which must be executed
         * in the appropriate order:
@@ -117,12 +117,12 @@
         * 		skip step 2 & 5 if possible (common case)
         *		...
         */
-     ```
-   ```
 
 
 
-   ```
+
+
+
 
 1.    Draw the background
 
@@ -147,7 +147,7 @@
 
         * onDraw(canvas)
 
-        ```Implement this to do your drawing```
+        Implement this to do your drawing
 
         空方法  需要子类实现
 
@@ -159,7 +159,7 @@
 
       * dispatchDraw()
 
-        ```Called by draw to draw the child views```
+        Called by draw to draw the child views
 
       * View中dispatchDraw方法为空 ViewGroup中实现该方法
 
@@ -227,7 +227,7 @@
    Activity调运完ActivityThread的main(实际上Activity的开始)方法后 , 调用ActivityThread类的performLaunchActivity来创建要启动的Activity组件 ,这个过程中为该Activity组件创建窗口对象和视图对象 ,调运ActivityThread类的handleResumeActivity将它激活
 
    ​	handleResumeActivity中 r.activity.makeVisible()  -> Activity - mDector.setVisibility(View.VISIBLE)
-```
+
 
 
 ### LayoutInflater 分析
@@ -254,7 +254,7 @@
 
      1. onMeasure
 
-     ```java
+     java
      protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {  
      	if (mOrientation == VERTICAL) {
              measureVertical(widthMeasureSpec, heightMeasureSpec);
@@ -262,16 +262,16 @@
              measureHorizontal(widthMeasureSpec, heightMeasureSpec);
          }
      }
-     ```
+
      判断布局方向
 
      2. measureVertical (measureVertical 与measureHorizontal实现类似)
 
-        ```Measures the children when the orientation of this LinearLayout is set to {@link #VERTICAL}.```
+        Measures the children when the orientation of this LinearLayout is set to {@link #VERTICAL}.
 
         *    相关变量
 
-             ```java
+             java
                 //记录内部使用的高度 不是LinearLayout的高度 =-=
                  mTotalLength = 0;
              	//所有子View中 宽度最大的值
@@ -304,11 +304,11 @@
                  final boolean useLargestChild = mUseLargestChild;
 
                  int largestChildHeight = Integer.MIN_VALUE;
-             ```
+
 
         *    测量
 
-             ```java
+             java
                     for (int i = 0; i < count; ++i) {
                          final View child = getVirtualChildAt(i);
 
@@ -415,7 +415,7 @@
 
                        i += getChildrenSkipCount(child, i);
                     }
-             ```
+
 
         *    测量相关
 
@@ -424,7 +424,7 @@
 
         *    weight - weight的再次测量
 
-             ```java
+             java
                      //useLargestChild属性相关
                      if (mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
                          mTotalLength += mDividerHeight;
@@ -458,4 +458,3 @@
                      // Reconcile our calculated size with the heightMeasureSpec
                      int heightSizeAndState = resolveSizeAndState(heightSize, heightMeasureSpec, 0);
                      heightSize = heightSizeAndState & MEASURED_SIZE_MASK;
-             ```
