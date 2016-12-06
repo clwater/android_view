@@ -480,4 +480,17 @@ public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean atta
        }
    }
 
+
+
+   /**
+   * Finalize inflating a view from XML.  This is called as the last phase
+   * of inflation, after all child views have been added.
+   *
+   * <p>Even if the subclass overrides onFinishInflate, they should always be
+   * sure to call the super method, so that we get called.
+   */
+   //可以添加自定义逻辑
+  protected void onFinishInflate() {
+  }
+
 ```
