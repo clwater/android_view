@@ -716,6 +716,7 @@ RelativeLayout更加关注子View的left right top bottom值 并且优先级高�
 
 
 ### RelativeLayout的layout过程
+对于RelativeLayout来的 layout过程更多的根据子View的left right top bottom值来设定位置 
 ```java
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         //  The layout has actually already been performed and the positions
