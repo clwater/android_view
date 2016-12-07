@@ -30,7 +30,7 @@ View的整个绘制流程是开始于ViewRootImpl类的performTraversals方法(1
             // Window can't resize. Force root view to be windowSize.
             measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.EXACTLY);
             break;
-        ......
+        ...
         }
         return measureSpec;
     }
@@ -300,6 +300,12 @@ setMeasuredDimension方法 对View的成员变量measuredWidth和measuredHeight�
 ### layout源码分析
 View layout整体流程与measure过程基本一样
 
+结论:
+* 需要根据ViewGroup本身的情况讨论 LinearLayout下会更看重子View的height和width 来安排对应位置 而RelativeLayout则更加关注子View的left right top bottom值 并且优先级高于width和height 甚至在部分自定义ViewGroup中 measure可能是无用的   直接使用layout方法来设置子View的位置也可以
+* ViewGroup需要实现自己的layout逻辑
+* layout_XXX中的各个熟悉都是针对子View的父ViewGroup的
+* 同样使用View的getWidth()和getHeight()方法来获取View测量的宽高 必须保证这两个方法在onLayout流程之后被调用才能返回有效值
+
 ```java
   /**
      * Assign a size and position to a view and all of its
@@ -370,3 +376,68 @@ onLyayout方法
 ```
 
 均是空方法  后面会就LinearLayout和RelativeLayout源码进行分析
+
+### draw源码分析
+
+View的draw流程图如下
+![Viewdraw]()
+
+结论:
+
+
+draw的源码也很长 但是官方也给出给出了draw的过程
+```java
+  public void draw(Canvas canvas) {
+     ...
+     /*
+      * Draw traversal performs several drawing steps which must be executed
+      * in the appropriate order:
+      *
+      *      1. Draw the background
+      *      2. If necessary, save the canvas' layers to prepare for fading
+      *      3. Draw view's content
+      *      4. Draw children
+      *      5. If necessary, draw the fading edges and restore layers
+      *      6. Draw decorations (scrollbars for instance)
+      */
+
+     // Step 1, draw the background, if needed
+     ...
+     if (!dirtyOpaque) {
+         drawBackground(canvas);
+     }
+
+     // skip step 2 & 5 if possible (common case)
+     ...
+
+     // Step 2, save the canvas' layers
+     ...
+         if (drawTop) {
+             canvas.saveLayer(left, top, right, top + length, null, flags);
+         }
+     ...
+
+     // Step 3, draw the content
+     if (!dirtyOpaque) onDraw(canvas);
+
+     // Step 4, draw the children
+     dispatchDraw(canvas);
+
+     // Step 5, draw the fade effect and restore layers
+     ...
+     if (drawTop) {
+         matrix.setScale(1, fadeHeight * topFadeStrength);
+         matrix.postTranslate(left, top);
+         fade.setLocalMatrix(matrix);
+         p.setShader(fade);
+         canvas.drawRect(left, top, right, top + length, p);
+     }
+     ...
+
+     // Step 6, draw decorations (scrollbars)
+     onDrawScrollBars(canvas);
+     ...
+ }
+```
+
+#### Step 1, draw the background, if needed
