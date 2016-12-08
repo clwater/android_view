@@ -17,6 +17,7 @@ public class TextButton extends Button {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+        String a = "a";
         Log.i("view", "dispatchTouchEvent-- action=" + event.getAction());
         return super.dispatchTouchEvent(event);
     }
@@ -25,5 +26,6 @@ public class TextButton extends Button {
     public boolean onTouchEvent(MotionEvent event) {
         Log.i("view", "onTouchEvent-- action="+event.getAction());
         return false;
+
     }
 }

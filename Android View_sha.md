@@ -1,4 +1,4 @@
-#Android View
+# Android View
 >Android View框架相关  View的测量 布局 绘制过程
 LinearLayout RelativeLayout实现源码分析
 
