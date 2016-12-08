@@ -441,3 +441,145 @@ draw的源码也很长 但是官方也给出给出了draw的过程
 ```
 
 #### Step 1, draw the background, if needed
+```java
+  // Step 1, draw the background, if needed
+  //如果需要的话绘制背景
+
+  if (!dirtyOpaque) {
+      drawBackground(canvas);
+  }
+```
+
+```java
+  private void drawBackground(Canvas canvas) {
+
+    	//通过xml中属性background或者代码中setBackGroundColor\setBackgroundResource等方法赋值的背景drawable
+        final Drawable background = mBackground;
+        if (background == null) {
+            return;
+        }
+
+        //根据layout中确定的view位置来设置背景的绘制区域
+        setBackgroundBounds();
+
+
+        // 如果需要的话使用显示列表
+        //canvas.isHardwareAccelerated() 硬件加速判定
+        //硬件加速时会将图层缓存到GPU上 而不是重绘View的每一层
+        if (canvas.isHardwareAccelerated() && mAttachInfo != null
+                && mAttachInfo.mHardwareRenderer != null) {
+            mBackgroundRenderNode = getDrawableRenderNode(background, mBackgroundRenderNode);
+
+            final RenderNode renderNode = mBackgroundRenderNode;
+            if (renderNode != null && renderNode.isValid()) {
+                setBackgroundRenderNodeProperties(renderNode);
+                ((DisplayListCanvas) canvas).drawRenderNode(renderNode);
+                return;
+            }
+        }
+
+        final int scrollX = mScrollX;
+        final int scrollY = mScrollY;
+        //调用Drawable的draw方法来完成背景的绘制工作
+        if ((scrollX | scrollY) == 0) {
+            background.draw(canvas);
+        } else {
+            canvas.translate(scrollX, scrollY);
+            background.draw(canvas);
+            canvas.translate(-scrollX, -scrollY);
+        }
+    }
+
+
+    void setBackgroundBounds() {
+    if (mBackgroundSizeChanged && mBackground != null) {
+        mBackground.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
+        mBackgroundSizeChanged = false;
+        rebuildOutline();
+    }
+  }
+```
+
+
+#### Step 2, save the canvas' layers
+```java
+  // Step 2, save the canvas' layers
+  //保存绘制图层
+
+         if (drawTop) {
+             canvas.saveLayer(left, top, right, top + length, null, flags);
+         }
+
+```
+
+#### // Step 3, draw the content
+```java
+  // Step 3, draw the content
+  //对View的内容进行绘制
+  if (!dirtyOpaque) onDraw(canvas);
+```
+```java
+  /**
+  * Implement this to do your drawing.
+  *
+  * @param canvas the canvas on which the background will be drawn
+  */
+  //onDraw也是空方法需要子类根据自身去实现相应的
+  protected void onDraw(Canvas canvas) {
+  }
+
+```
+
+#### Step 4, draw the children
+```java
+  // Step 4, draw the children
+  //绘制其子View
+  dispatchDraw(canvas);
+```
+
+```java
+  /**
+   * Called by draw to draw the child views. This may be overridden
+   * by derived classes to gain control just before its children are drawn
+   * (but after its own view has been drawn).
+   * @param canvas the canvas on which to draw the view
+   */
+  protected void dispatchDraw(Canvas canvas) {
+  //dispatchDraw同样空方法 与onDraw不同的是dispatchDraw在ViewGroup中被重写
+  }
+```
+
+ViewGroup
+```java
+/**
+ * Views which have been hidden or removed which need to be animated on
+ * their way out.
+ * This field should be made private, so it is hidden from the SDK.
+ * {@hide}
+ */
+protected ArrayList<View> mDisappearingChildren;
+
+
+protected void dispatchDraw(Canvas canvas) {
+      boolean usingRenderNodeProperties = canvas.isRecordingFor(mRenderNode);
+      final int childrenCount = mChildrenCount;
+      final View[] children = mChildren;
+      ...
+
+      // Draw any disappearing views that have animations
+      if (mDisappearingChildren != null) {
+          final ArrayList<View> disappearingChildren = mDisappearingChildren;
+          final int disappearingCount = disappearingChildren.size() - 1;
+          // Go backwards -- we may delete as animations finish
+          for (int i = disappearingCount; i >= 0; i--) {
+              final View child = disappearingChildren.get(i);
+              more |= drawChild(canvas, child, drawingTime);
+
+      ...    
+  }
+
+
+  protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+    return child.draw(canvas, this, drawingTime);
+  }
+```
