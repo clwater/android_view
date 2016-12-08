@@ -384,6 +384,8 @@ View的draw流程图如下
 ![Viewdraw](View draw流程.png)
 
 结论:
+* View需要在子类中实现onDraw的过程
+* 在ViewGroup中 会调用其子View的方法 顺序与子view的添加顺序一致
 
 
 draw的源码也很长 但是官方也给出给出了draw的过程
