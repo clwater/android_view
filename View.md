@@ -380,7 +380,8 @@ onLyayout方法
 ### draw源码分析
 
 View的draw流程图如下
-![Viewdraw]()
+
+![Viewdraw](View draw流程.png)
 
 结论:
 
