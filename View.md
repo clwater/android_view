@@ -551,35 +551,34 @@ draw的源码也很长 但是官方也给出给出了draw的过程
 
 ViewGroup
 ```java
-/**
- * Views which have been hidden or removed which need to be animated on
- * their way out.
- * This field should be made private, so it is hidden from the SDK.
- * {@hide}
- */
-protected ArrayList<View> mDisappearingChildren;
-
-
-protected void dispatchDraw(Canvas canvas) {
-      boolean usingRenderNodeProperties = canvas.isRecordingFor(mRenderNode);
-      final int childrenCount = mChildrenCount;
-      final View[] children = mChildren;
+  //dispatchDraw方法中根据子View的不同情况 包括但不只包括该View是否显示 是否有进入或消失动画等进行了部分的调整
+  protected void dispatchDraw(Canvas canvas) {
       ...
-
-      // Draw any disappearing views that have animations
-      if (mDisappearingChildren != null) {
-          final ArrayList<View> disappearingChildren = mDisappearingChildren;
-          final int disappearingCount = disappearingChildren.size() - 1;
-          // Go backwards -- we may delete as animations finish
-          for (int i = disappearingCount; i >= 0; i--) {
-              final View child = disappearingChildren.get(i);
-              more |= drawChild(canvas, child, drawingTime);
-
+        more |= drawChild(canvas, transientChild, drawingTime);
       ...    
   }
-
 
   protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
     return child.draw(canvas, this, drawingTime);
   }
+```
+#### Step 5, draw the fade effect and restore layers
+
+```java
+  // Step 5, draw the fade effect and restore layers
+  //绘制过度效果和恢复图层
+  if (drawTop) {
+      matrix.setScale(1, fadeHeight * topFadeStrength);
+      matrix.postTranslate(left, top);
+      fade.setLocalMatrix(matrix);
+      p.setShader(fade);
+      canvas.drawRect(left, top, right, top + length, p);
+  }
+```
+
+####  Step 6, draw decorations (scrollbars)
+```java
+  // Step 6, draw decorations (scrollbars)
+  //对滚动条进行绘制
+  onDrawScrollBars(canvas);
 ```
