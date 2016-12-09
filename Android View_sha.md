@@ -210,13 +210,10 @@ LinearLayout RelativeLayout实现源码分析
    所以各种View的findViewById方法什么的可以放在这里
 
 5. setContentView源码总结
-  创建一个DecorView的对象mDector 该mDector将作为整个应用窗口的根视图
-
-  根据根据Feature等style theme创建不同的窗口修饰布局文件 并且通过findViewById获取Activity布局文件该存放的地方
-
-  将Activity的布局文件添加至id为content的FrameLayout内
-
-  执行到当前页面还没有显示出来
+  * 创建一个DecorView的对象mDector 该mDector将作为整个应用窗口的根视图
+  *  根据根据Feature等style theme创建不同的窗口修饰布局文件 并且通过findViewById获取Activity布局文件该存放的地方
+  *  将Activity的布局文件添加至id为content的FrameLayout内
+  *  执行到当前页面还没有显示出来
 
 6. Activity页面显示
 
@@ -415,19 +412,8 @@ LinearLayout RelativeLayout实现源码分析
       }
 
   ```
-
   相关inflate参数的结果
-
-
-  | int resource  | ViewGroup root | boolean attachToRoot | 效果 |
-  | -----:|-----:| -----:|:----------|
-  | xml Id | null | - | 只创建temp的View 返回temp |
-  | xml Id | parent | - | 创建temp的View 执行root.addView(temp, params) 返回root |
-  | xml Id | parent | false | 创建temp的View 执行temp.setLayoutParams(params) 返回temp|
-  | xml Id | parent | true| 创建temp的View 执行root.addView(temp , params) 返回root|
-  | xml Id | null| false | 只创建temp的View 返回temp |
-  | xml Id | null| true| 只创建temp的View 返回temp |
-
+  ![inflate参数.png](/inflate参数.png)
 
 4. 相关方法解析
   在Inflate中多次被调用的rInflate
@@ -1004,7 +990,7 @@ draw的源码也很长 但是官方也给出给出了draw的过程
 
 ```
 
-#### // Step 3, draw the content
+#### Step 3, draw the content
 ```java
   // Step 3, draw the content
   //对View的内容进行绘制
