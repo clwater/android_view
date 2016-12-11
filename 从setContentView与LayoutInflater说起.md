@@ -13,7 +13,7 @@
 
   ![View层级分析](/View层级分析.png)
 
-  通过hierarchyviewer工具分析一下
+  具体的可以通过hierarchyviewer工具分析一下
 
 
 
