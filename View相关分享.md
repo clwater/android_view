@@ -3,7 +3,6 @@
 LinearLayout RelativeLayout实现源码分析
 
 
-
 ## 从setContentView与LayoutInflater说起
 ### setContentView分析
 #### 相关关系
