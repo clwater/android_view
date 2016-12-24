@@ -1,6 +1,5 @@
 ## View的测量 布局 绘制过程
 
-
 ### 测量之前的事情
 View的整个绘制流程是开始于ViewRootImpl类的performTraversals方法(1k行)  根据相关设置来觉得十分要重新执行相关功能
 ```java
