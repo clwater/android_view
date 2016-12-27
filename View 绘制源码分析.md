@@ -41,7 +41,7 @@ View的整个绘制流程是开始于ViewRootImpl类的performTraversals方法(1
         return measureSpec;
     }
   ```
-View measure整体流程图如下
+View 绘制整体流程图如下
 
 ![View绘制整体流程图](/View.png)
 
